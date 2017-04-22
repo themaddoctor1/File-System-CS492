@@ -151,6 +151,32 @@ long allocBlock() {
 
 }
 
+int enoughMemFor(long amt) {
+    int secs = sizeOfLL(MEM_ALLOC) / 2;
+    long avail = 0;
+    int i;
+
+    /* If memory is empty, the answer is simple. */
+    if (secs == 0)
+        return NUM_BLOCKS >= amt;
+    
+    /* The amount of memory is equal to the total amount
+       of memory between each block of allocated memory. */
+    avail = *((long*) getFromLL(MEM_ALLOC, 0));
+    for (i = 1; i < secs && avail < amt; i++) {
+        avail += *((long*) getFromLL(MEM_ALLOC, 2*i-1)),
+                 - *((long*) getFromLL(MEM_ALLOC, 2*i));
+    }
+    
+    /* If all gaps were viewed, tack the end onto the total */
+    if (i == secs)
+        avail += NUM_BLOCKS - *((long*) getFromLL(MEM_ALLOC, 2*secs-1));
+    
+    /* Answer the question */
+    return amt <= avail;
+
+}
+
 DirTree getRelTree(DirTree tree, char **path) {
     if (!path || !path[0])
         return getRootNode();

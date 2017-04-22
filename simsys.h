@@ -19,6 +19,7 @@ long blockSize();
  */
 void freeBlock(long);
 long allocBlock();
+int  enoughMemFor(long);
 
 /**
  * Gets a relative node in the tree structure.

@@ -139,8 +139,6 @@ int addFileToTree(DirTree tree, char *path[]) {
     return addNodeToTree(tree, path, 1);
 }
 
-
-
 long filesizeOfDirTree(DirTree tree, char *path[]) {
     if (!tree)
         return 0;

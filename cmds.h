@@ -7,6 +7,11 @@ char** str_to_vec(char*, char);
 void free_str_vec(char**);
 
 /**
+ * Executes a command in the file system.
+ */
+int cmd_exec(char *argv[]);
+
+/**
  * Modifies the working directory.
  */
 int cmd_cd(char *argv[]);
@@ -40,7 +45,7 @@ int cmd_dir(char *argv[]);    /* TODO: Implement */
 /**
  * Print file/disk info.
  */
-int cmd_prfiles(char *argv[]);
-int cmd_prdisks(char *argv[]);
+int cmd_prfiles(char *argv[]); /* TODO: Implement */
+int cmd_prdisks(char *argv[]); /* TODO: Implement */
 
 #endif

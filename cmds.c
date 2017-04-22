@@ -71,6 +71,45 @@ void error_message(char *cmd, char *mssg) {
     printf("%s: Cannot perform operation: %s\n", cmd, mssg);
 }
 
+/**
+ * Runs a command.
+ *
+ * argv - The command vector to execute.
+ */
+void cmd_exec(char *argv[]) {
+    SimCmd cmd;
+    char *name = argv[0];
+    
+    if (!strcmp(name, "cd"))
+        cmd = cmd_cd;
+    else if (!strcmp(name, "ls"))
+        cmd = cmd_ls;
+    else if (!strcmp(name, "mkdir"))
+        cmd = cmd_mkdir;
+    else if (!strcmp(name, "create"))
+        cmd = cmd_create;
+    else if (!strcmp(name, "append"))
+        cmd = cmd_append;
+    else if (!strcmp(name, "remove"))
+        cmd = cmd_remove;
+    else if (!strcmp(name, "delete"))
+        cmd = cmd_delete;
+    else if (!strcmp(name, "exit"))
+        cmd = cmd_exit;
+    else if (!strcmp(name, "dir"))
+        cmd = cmd_dir;
+    else if (!strcmp(name, "prfiles"))
+        cmd = cmd_prfiles;
+    else if (!strcmp(name, "prdisks"))
+        cmd = cmd_prdisks;
+    else {
+        printf("%s: command not found.\n", argv[0]);
+        return;
+    }
+
+    cmd(argv);
+}
+
 int cmd_cd(char *argv[]) {
     char **dirtoks;
     
@@ -131,6 +170,8 @@ int cmd_ls(char *argv[]) {
         return 1;
     } else {
         LList files = getDirTreeChildren(tgt);
+
+        printf("total %i\n", sizeOfLL(files));
         
         /* Go through each file, removing from the list as it goes */
         while (!isEmptyLL(files)) {
@@ -219,4 +260,103 @@ int cmd_mkdir(char *argv[]) {
     }
 
 }
+
+/**
+ * Creates a file in the file structure.
+ */
+int cmd_create(char *argv[]) {
+    if (!argv[1]) {
+        error_message("create", "No file names provided.");
+        return 1;
+    } else {
+        /* Get a list of all of the files in the directory */
+        int errCode = 0;
+
+        int i = 1;
+        while (argv[i]) {
+            /* Build a path */
+            char **path = str_to_vec(argv[i], '/');
+            char *filenm;
+            int j, k;
+            DirTree tgtDir;
+            LList files;
+            
+            /* Separate the target name and its path */
+            for (k = 0; path[k]; k++);
+            filenm = path[k-1];
+            path[k-1] = NULL;
+            
+            /* Get the potential parent node */
+            tgtDir = getRelTree(getWorkDirNode(), path);
+            files = getDirTreeChildren(tgtDir);
+
+
+            for (j = sizeOfLL(files) - 1; j >= 0; j--) {
+                DirTree file = (DirTree) getFromLL(files, j);
+
+                if (!strcmp(getTreeFilename(file), argv[i])) {
+                    /* Don't make duplicate directories */
+                    printf("create: Cannot make file %s: Already exists.\n", argv[i]);
+                    errCode = 1;
+                    break;
+                }
+            }
+
+            path[k-1] = filenm;
+            
+            if (j < 0) {
+                /* Add the directory */
+                addFileToTree(getWorkDirNode(), path);
+            }
+
+            /* Free used memory */
+            free_str_vec(path);
+            while (!isEmptyLL(files))
+                remFromLL(files, 0);
+            free(files);
+
+            i++;
+        }
+
+        
+        return errCode;
+    }
+}
+
+int cmd_append(char *argv[]) {
+    error_message(argv[0], "Not yet implemented."); return 0;
+}
+
+
+int cmd_remove(char *argv[]) {
+    error_message(argv[0], "Not yet implemented."); return 0;
+}
+
+
+int cmd_delete(char *argv[]) {
+    error_message(argv[0], "Not yet implemented."); return 0;
+}
+
+
+int cmd_exit(char *argv[]) {
+    error_message(argv[0], "Not yet implemented."); return 0;
+}
+
+
+int cmd_dir(char *argv[]) {
+    error_message(argv[0], "Not yet implemented."); return 0;
+}
+
+
+int cmd_prfiles(char *argv[]) {
+    error_message(argv[0], "Not yet implemented."); return 0;
+}
+
+
+int cmd_prdisks(char *argv[]) {
+    error_message(argv[0], "Not yet implemented."); return 0;
+}
+
+
+
 
