@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 struct filedata {
     long size;
@@ -92,6 +93,7 @@ int addNodeToTree(DirTree tree, char *path[], int is_file) {
     char *filename;
     
     /* Make memory space for subpath */
+    i = 0;
     while (path[i]) i++;
     subpath = (char**) malloc(i * sizeof(char*));
 
@@ -263,6 +265,41 @@ int rmdirFromTree(DirTree tree, char *path[]) {
 
     } else
         return rmfileFromTree(getDirSubtree(tree, path), NULL);
+}
+
+int isTreeFile(DirTree tree) {
+    return tree->is_file;
+}
+
+char* getTreeFilename(DirTree tree) {
+    return tree->name;
+}
+
+LList getDirTreeChildren(DirTree tree) {
+    LList list = makeLL();
+    int i;
+
+    if (tree->is_file)
+        return list;
+    
+    /* Add each item in alphabetical order */
+    for (i = sizeOfLL(tree->dir_dta.files) - 1; i >= 0; i--) {
+        DirTree elem = (DirTree) getFromLL(tree->dir_dta.files, i);
+        
+        int j;
+        for (j = sizeOfLL(list) - 1; j >= 0; j--) {
+            DirTree tst = (DirTree) getFromLL(list, j);
+            if (strcmp(tst->name, elem->name) < 0) {
+                break;
+            }
+        }
+
+        addToLL(list, j+1, elem);
+
+    }
+
+    return list;
+
 }
 
 

@@ -1,6 +1,8 @@
 #ifndef _DIRTREE_H_
 #define _DIRTREE_H_
 
+#include "linkedlist.h"
+
 struct dirtree;
 typedef struct dirtree* DirTree;
 
@@ -66,5 +68,9 @@ long numFilesInTreeDir(DirTree tree, char *dir[], int recursive);
  * Computes size of file, in bytes. If actually a directory, returns 0.
  */
 long treeFileSize(DirTree tree, char *filepath[]);
+
+int isTreeFile(DirTree tree);
+char* getTreeFilename(DirTree tree);
+LList getDirTreeChildren(DirTree tree);
 
 #endif

@@ -37,7 +37,7 @@ int sizeOfLL(LList l) {
 }
 
 int isEmptyLL(LList l) {
-    return l && l->head;
+    return !l || !(l->head);
 }
 
 void* getFromLL(LList l, int idx) {
@@ -107,6 +107,7 @@ void addToLL(LList l, int idx, void *val) {
     }
 
     node = (LLnode) malloc(sizeof(struct llnode));
+    node->val = val;
 
     if (idx <= 0) {
         /* Front of list case */
@@ -118,9 +119,9 @@ void addToLL(LList l, int idx, void *val) {
             curr = curr->next; 
             idx--;
         }
-
+        
+        node->next = curr->next;
         curr->next = node;
-        node->next = NULL;
     }
 }
 
@@ -144,15 +145,21 @@ void* remFromLL(LList l, int idx) {
 
         void *res = NULL;
 
-        while (idx < 1 && curr->next->next) {
+        while (idx > 1 && curr->next->next) {
             curr = curr->next;
             idx--;
         }
         
-        rem = curr->next;
+        if (idx > 0) {
+            rem = curr->next;
+            res = curr->next->val;
 
-        res = curr->next->val;
-        curr->next = curr->next->next;
+            curr->next = curr->next->next;
+        } else {
+            rem = curr;
+            res = curr->val;
+            l->head = rem->next;
+        }
 
         rem->val = NULL;
         rem->next = NULL;

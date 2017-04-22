@@ -1,3 +1,5 @@
+#ifndef _LINKEDLIST_H_
+#define _LINKEDLIST_H_
 
 struct linkedlist;
 typedef struct linkedlist* LList;
@@ -16,4 +18,4 @@ void addToLL(LList l, int idx, void *val);
 
 void* remFromLL(LList l, int idx);
 
-
+#endif
