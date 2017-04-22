@@ -67,6 +67,15 @@ void free_str_vec(char **vec) {
     free(vec);
 }
 
+DirTree getRelTree(DirTree tree, char **path) {
+    if (!path || !path[0])
+        return getRootNode();
+    else if (strcmp(path[0], ""))
+        return getDirSubtree(tree, path);
+    else
+        return getDirSubtree(getRootNode(), &path[1]);
+}
+
 void error_message(char *cmd, char *mssg) {
     printf("%s: Cannot perform operation: %s\n", cmd, mssg);
 }
@@ -75,8 +84,9 @@ int cmd_cd(char *argv[]) {
     char **dirtoks;
     
     if (!argv[1]) {
-        error_message("cd", "No arguments provided.");
-        return 1;
+        /* Default is to go to root. */
+        setWorkDirNode(getRootNode());
+        return 0;
     } else if (argv[2]) {
         error_message("cd", "Too many arguments provided.");
         return 1;
@@ -86,8 +96,8 @@ int cmd_cd(char *argv[]) {
         /* Build a token vector */
         dirtoks = str_to_vec(argv[1], '/');
 
-        /* Perform the function call */
-        tgt = getDirSubtree(getWorkDirNode(), dirtoks);
+        /* Get the destination */
+        tgt = getRelTree(getWorkDirNode(), dirtoks);
 
         /* Free the vector */
         free_str_vec(dirtoks);
@@ -105,6 +115,9 @@ int cmd_cd(char *argv[]) {
     }
 }
 
+/**
+ * Lists the contents of a directory.
+ */
 int cmd_ls(char *argv[]) {
     DirTree tgt;
     DirTree working_dir = getWorkDirNode();
@@ -113,7 +126,8 @@ int cmd_ls(char *argv[]) {
         char **dirtoks = str_to_vec(argv[1], '/');
 
         /* Adjust the node to print */
-        tgt = getDirSubtree(working_dir, dirtoks);
+        tgt = getRelTree(working_dir, dirtoks);
+
         free_str_vec(dirtoks);
     } else
         tgt = working_dir;
@@ -130,11 +144,15 @@ int cmd_ls(char *argv[]) {
         /* Go through each file, removing from the list as it goes */
         while (!isEmptyLL(files)) {
             DirTree file = (DirTree) remFromLL(files, 0);
-
-            printf("%s", getTreeFilename(file));
+            int is_file = isTreeFile(file);
+             
+            printf("%s%s%s", 
+                is_file ? "" : "\033[1m\033[34m",
+                getTreeFilename(file),
+                "\033[0m");
             
             /* Prints only if the child is a file */
-            if (isTreeFile(file))
+            if (is_file)
                 printf(" - %ldB",treeFileSize(file, NULL));
 
             printf("\n");
@@ -148,7 +166,7 @@ int cmd_ls(char *argv[]) {
 }
 
 /**
- * Creates a directory.
+ * Creates a directory, or set of directories.
  */
 int cmd_mkdir(char *argv[]) {
     
@@ -174,7 +192,7 @@ int cmd_mkdir(char *argv[]) {
             path[k-1] = NULL;
             
             /* Get the potential parent node */
-            tgtDir = getDirSubtree(getWorkDirNode(), path);
+            tgtDir = getRelTree(getWorkDirNode(), path);
             files = getDirTreeChildren(tgtDir);
 
 

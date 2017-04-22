@@ -67,7 +67,7 @@ DirTree getDirSubtree(DirTree tree, char *path[]) {
     else if (tree->is_file)
         return NULL; /* Files do not have subdirectories. */
 
-    else if (!strcmp(path[0], "."))
+    else if (!path[0][0] || !strcmp(path[0], "."))
         return getDirSubtree(tree, &path[1]); /* Stay in current dir */
 
     else if (!strcmp(path[0], ".."))
