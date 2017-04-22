@@ -6,38 +6,56 @@
 #include <stdlib.h>
 #include <string.h>
 
-char** dir_to_vec(char *str) {
-    /* First, I count the number of strings */
-    int tokens = 0;
-    int i, j;
-    char **vec;
-    
-    i = 0;
-    while (str[i]) {
-        while (str[i] && str[i] != '/') i++;
-        tokens++;
-        i++;
-    }
-    
-    vec = (char**) malloc((tokens+1) * sizeof(char*));
+char** str_to_vec(char *str, char split_c) {
+    char** vec = (char**) malloc(sizeof(char*));
+    char *next;
+    int i, j, k;
+    int size = 0;
 
-    i = 0;
-    j = 0;
-    while (str[i]) {
-        int k = i;
-        while (str[k] && str[k] != '/') k++;
-
-        vec[j] = (char*) malloc((k+1-i) * sizeof(char));
-        strncpy(vec[j], &str[i], k-i);
-        vec[j][k] = '\0';
+    vec[0] = NULL;
+    
+    k = 0;
+    while (1) {
+        int m, n;
+        char **tmp;
         
-        i = k+1;
-        j++;
+        for (m = 0, n = 0; str[k+n+m] != split_c && str[k+n+m]; n++) {
+            /* Skip backslashes */
+            if (str[k+n+m] == '\\'/* && str[k+n+m+1]*/)
+                m++;
+        }
+        
+        /* Make the new string */
+        next = (char*) malloc((n+1) * sizeof(char));
+        for (i = 0, j = 0; i < n; i++) {
+            if (str[k+i+j] == '\\')
+                j++;
+            next[i] = str[k+i+j];
+        }
+        next[n] = '\0';
+
+        vec[size] = next;
+
+        /* Realloc */
+        size++;
+        tmp = (char**) realloc(vec, (size+1) * sizeof(char*));
+        if (!tmp) {
+            printf("Have to reallocate.\n");
+            tmp = (char**) malloc((size+1) * sizeof(char*));
+            memcpy(tmp, vec, size * sizeof(char*));
+        }
+
+        vec = tmp;
+        vec[size] = NULL;
+        
+        /* Update k */
+        if (str[k+m+n]) 
+            k += n+m+1;
+        else
+            return vec;
+
     }
 
-    vec[j] = NULL;
-
-    return vec;
 }
 
 void free_str_vec(char **vec) {
@@ -66,7 +84,7 @@ int cmd_cd(char *argv[]) {
         DirTree tgt;
 
         /* Build a token vector */
-        dirtoks = dir_to_vec(argv[1]);
+        dirtoks = str_to_vec(argv[1], '/');
 
         /* Perform the function call */
         tgt = getDirSubtree(getWorkDirNode(), dirtoks);
@@ -92,7 +110,7 @@ int cmd_ls(char *argv[]) {
     DirTree working_dir = getWorkDirNode();
 
     if (argv[1]) {
-        char **dirtoks = dir_to_vec(argv[1]);
+        char **dirtoks = str_to_vec(argv[1], '/');
 
         /* Adjust the node to print */
         tgt = getDirSubtree(working_dir, dirtoks);
@@ -129,6 +147,9 @@ int cmd_ls(char *argv[]) {
     return 0;
 }
 
+/**
+ * Creates a directory.
+ */
 int cmd_mkdir(char *argv[]) {
     
     if (!argv[1]) {
@@ -136,13 +157,27 @@ int cmd_mkdir(char *argv[]) {
         return 1;
     } else {
         /* Get a list of all of the files in the directory */
-        LList files = getDirTreeChildren(getWorkDirNode());
         int errCode = 0;
 
         int i = 1;
         while (argv[i]) {
+            /* Build a path */
+            char **path = str_to_vec(argv[i], '/');
+            char *dirnm;
+            int j, k;
+            DirTree tgtDir;
+            LList files;
             
-            int j;
+            /* Separate the target name and its path */
+            for (k = 0; path[k]; k++);
+            dirnm = path[k-1];
+            path[k-1] = NULL;
+            
+            /* Get the potential parent node */
+            tgtDir = getDirSubtree(getWorkDirNode(), path);
+            files = getDirTreeChildren(tgtDir);
+
+
             for (j = sizeOfLL(files) - 1; j >= 0; j--) {
                 DirTree file = (DirTree) getFromLL(files, j);
 
@@ -154,22 +189,22 @@ int cmd_mkdir(char *argv[]) {
                 }
             }
 
+            path[k-1] = dirnm;
+            
             if (j < 0) {
-                /* Build a path */
-                char *path[2];
-                path[0] = argv[i];
-                path[1] = NULL;
-                
                 /* Add the directory */
                 addDirToTree(getWorkDirNode(), path);
             }
 
+            /* Free used memory */
+            free_str_vec(path);
+            while (!isEmptyLL(files))
+                remFromLL(files, 0);
+            free(files);
+
             i++;
         }
 
-        while (!isEmptyLL(files))
-            remFromLL(files, 0);
-        free(files);
         
         return errCode;
     }

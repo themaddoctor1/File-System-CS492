@@ -3,7 +3,7 @@
 
 typedef int (*SimCmd)(char**);
 
-char** dir_to_vec(char*);
+char** str_to_vec(char*, char);
 void free_str_vec(char**);
 
 /**
