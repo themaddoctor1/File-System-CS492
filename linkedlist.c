@@ -1,3 +1,6 @@
+#ifndef _LINKEDLIST_H_
+#define _LINKEDLIST_H_
+
 #include <stdlib.h>
 
 struct llnode {
@@ -8,7 +11,8 @@ typedef struct llnode* LLnode;
 
 struct linkedlist {
     LLnode head;
-}
+};
+typedef struct linkedlist* LList;
 
 LList makeLL() {
     LList list = (LList) malloc(sizeof(struct linkedlist));
@@ -53,6 +57,23 @@ void* getFromLL(LList l, int idx) {
     }
 
     return NULL;
+}
+
+int indexOfLL(LList l, void *val) {
+    
+    LLnode curr;
+    int i;
+
+    if (!l)
+        return -1;
+
+    curr = l->head;
+    for (i = 0; curr; i++, curr = curr->next) {
+        if (curr->val == val)
+            return i;
+    }
+
+    return -1;
 }
 
 void appendToLL(LList l, void *val) {
@@ -143,4 +164,4 @@ void* remFromLL(LList l, int idx) {
 }
 
 
-
+#endif
