@@ -67,15 +67,6 @@ void free_str_vec(char **vec) {
     free(vec);
 }
 
-DirTree getRelTree(DirTree tree, char **path) {
-    if (!path || !path[0])
-        return getRootNode();
-    else if (strcmp(path[0], ""))
-        return getDirSubtree(tree, path);
-    else
-        return getDirSubtree(getRootNode(), &path[1]);
-}
-
 void error_message(char *cmd, char *mssg) {
     printf("%s: Cannot perform operation: %s\n", cmd, mssg);
 }
