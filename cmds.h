@@ -17,25 +17,25 @@ int cmd_ls(char *argv[]);
  * File/directory creators.
  */
 int cmd_mkdir(char *argv[]);
-int cmd_create(char *argv[]);
+int cmd_create(char *argv[]); /* TODO: Implement */
 
 /**
  * Modifying the size of a file.
  */
-int cmd_append(char *argv[]);
-int cmd_remove(char *argv[]);
+int cmd_append(char *argv[]); /* TODO: Implement */
+int cmd_remove(char *argv[]); /* TODO: Implement */
 
-int cmd_delete(char *argv[]);
+int cmd_delete(char *argv[]); /* TODO: Implement */
 
 /**
  * Terminate program.
  */
-int cmd_exit(char *argv[]);
+int cmd_exit(char *argv[]);   /* TODO: Implement */
 
 /**
  * Breadth-first print of file structure.
  */
-int cmd_dir(char *argv[]);
+int cmd_dir(char *argv[]);    /* TODO: Implement */
 
 /**
  * Print file/disk info.

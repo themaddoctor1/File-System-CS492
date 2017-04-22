@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 long BLOCK_SIZE;
 long NUM_BLOCKS;
@@ -149,3 +150,17 @@ long allocBlock() {
     }
 
 }
+
+DirTree getRelTree(DirTree tree, char **path) {
+    if (!path || !path[0])
+        return getRootNode();
+    else if (strcmp(path[0], ""))
+        return getDirSubtree(tree, path);
+    else
+        return getDirSubtree(getRootNode(), &path[1]);
+}
+
+
+
+
+

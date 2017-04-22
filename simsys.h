@@ -17,8 +17,15 @@ long blockSize();
  * each successfully acquired block. Given n, at most
  * n blocks will be acquired.
  */
-
 void freeBlock(long);
 long allocBlock();
+
+/**
+ * Gets a relative node in the tree structure.
+ * tree - A subtree known to be a child of root.
+ * path - A tokenized path between tree and the
+ *        destination.
+ */
+DirTree getRelTree(DirTree, char**);
 
 #endif
