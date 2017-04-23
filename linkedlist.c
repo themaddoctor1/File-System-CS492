@@ -11,6 +11,7 @@ typedef struct llnode* LLnode;
 
 struct linkedlist {
     LLnode head;
+    LLnode tail;
 };
 typedef struct linkedlist* LList;
 
@@ -84,15 +85,14 @@ void appendToLL(LList l, void *val) {
         l->head = (LLnode) malloc(sizeof(struct llnode));
         l->head->val = val;
         l->head->next = NULL;
+        l->tail = l->head;
     } else {
         /* List is non-empty */
+        l->tail->next = (LLnode) malloc(sizeof(struct llnode));
+        l->tail = l->tail->next;
 
-        LLnode curr = l->head;
-        while (curr->next)
-            curr = curr->next;
-        curr->next = (LLnode) malloc(sizeof(struct llnode));
-        curr->next->val = val;
-        curr->next->next = NULL;
+        l->tail->val = val;
+        l->tail->next = NULL;
     }
 }
 
@@ -120,6 +120,10 @@ void addToLL(LList l, int idx, void *val) {
             idx--;
         }
         
+        /* Set new tail if necessary */
+        if (curr->next == NULL)
+            l->tail = node;
+
         node->next = curr->next;
         curr->next = node;
     }
@@ -135,7 +139,7 @@ void* remFromLL(LList l, int idx) {
 
         l->head->val = NULL;
         free(l->head);
-        l->head = NULL;
+        l->head = l->tail = NULL;
 
         return res;
     } else {
@@ -151,6 +155,7 @@ void* remFromLL(LList l, int idx) {
         }
         
         if (idx > 0) {
+            /* Item is at front of list */
             rem = curr->next;
             res = curr->next->val;
 
@@ -159,6 +164,9 @@ void* remFromLL(LList l, int idx) {
             rem = curr;
             res = curr->val;
             l->head = rem->next;
+
+            if (rem->next == NULL)
+                l->tail = curr;
         }
 
         rem->val = NULL;
