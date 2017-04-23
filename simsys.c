@@ -178,8 +178,10 @@ int enoughMemFor(long amt) {
 }
 
 DirTree getRelTree(DirTree tree, char **path) {
-    if (!path || !path[0])
+    if (!path)
         return getRootNode();
+    else if (!path[0])
+        return getWorkDirNode();
     else if (strcmp(path[0], ""))
         return getDirSubtree(tree, path);
     else

@@ -4,6 +4,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include <unistd.h>
 
 void testLinkedList() {
     int i;
@@ -196,9 +199,58 @@ void testCmds() {
 
 int main(int argc, char *argv[]) {
     
-    while (1) {
-        char buff[1024];
+    /* Initialize the filesystem */
+    init_filesystem(32, 1024);
 
+    while (1) {
+        char buff[64];
+        char *cmd = malloc(sizeof(char));
+        char **arg_vec;
+        int n, len;
+        
+        len = 0;
+
+        printf("$ ");
+        fflush(stdout);
+
+        /* Read from stdin */
+        while ((n = read(0, buff, 64))) {
+            char *tmp = (char*) realloc(cmd, (len+65)*sizeof(char));
+
+            if (!tmp) {
+                tmp = (char*) malloc((len+65) * sizeof(char));
+                strcpy(tmp, cmd);
+                free(cmd);
+            }
+            cmd = tmp;
+
+            n = 0;
+            while (n < 64) {
+                if (buff[n] == '\n') {
+                    cmd[len+n] = '\0';
+                    break;
+                }
+                cmd[len+n] = buff[n];
+                n++;
+            }
+
+            len += n;
+
+            if (n < 64)
+                break;
+        }
+
+        cmd[len] = '\0';
+
+        /* Tokenize the command */
+        arg_vec = str_to_vec(cmd, ' ');
+        free(cmd);
+
+        /* Run the command */
+        cmd_exec(arg_vec);
+        free_str_vec(arg_vec);
+
+        
 
     }
     

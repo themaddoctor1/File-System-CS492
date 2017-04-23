@@ -133,10 +133,10 @@ int cmd_cd(char *argv[]) {
         free_str_vec(dirtoks);
         
         if (!tgt) {
-            error_message("cd", "Directory not found.\n");
+            error_message("cd", "Directory not found.");
             return 1;
         } else if (isTreeFile(tgt)) {
-            error_message("cd", "Target is not a directory.\n");
+            error_message("cd", "Target is not a directory.");
             return 1;
         } else {
             setWorkDirNode(tgt);
@@ -227,13 +227,12 @@ int cmd_mkdir(char *argv[]) {
             tgtDir = getRelTree(getWorkDirNode(), path);
             files = getDirTreeChildren(tgtDir);
 
-
             for (j = sizeOfLL(files) - 1; j >= 0; j--) {
                 DirTree file = (DirTree) getFromLL(files, j);
 
                 if (!strcmp(getTreeFilename(file), argv[i])) {
                     /* Don't make duplicate directories */
-                    printf("mkdir: Cannot make directory %s: Already exists.\n", argv[i]);
+                    printf("mkdir: Cannot make directory '%s': Already exists.\n", argv[i]);
                     errCode = 1;
                     break;
                 }
@@ -334,12 +333,54 @@ int cmd_remove(char *argv[]) {
 
 
 int cmd_delete(char *argv[]) {
-    error_message(argv[0], "Not yet implemented."); return 0;
+    if (!argv[1]) {
+         printf("rm: missing operand\n");
+         return 1;
+    } else {
+        int errCode = 0;
+        int i = 1;
+
+        while (argv[i]) {
+            char **path = str_to_vec(argv[i], '/');
+            DirTree tgt = getRelTree(getWorkDirNode(), path);
+            int n;
+            
+            if (!tgt) {
+                errCode = 1;
+                n = 1;
+            } else if (isTreeFile(tgt))
+                n = rmfileFromTree(tgt, NULL);
+            else
+                n = rmdirFromTree(tgt, NULL);
+
+            if (n) {
+                errCode = 1;
+                printf("delete: cannot delete '%s': No such file or directory", argv[i]);
+
+            }
+
+            i++;
+
+        }
+
+        return errCode;
+    }
 }
 
 
+/**
+ * Terminates the program.
+ */
 int cmd_exit(char *argv[]) {
-    error_message(argv[0], "Not yet implemented."); return 0;
+    printf("Note: exit not fully implemented.\n");
+    
+    if (argv[1])
+        exit(atoi(argv[1]));
+    else
+        exit(0);
+
+    return 0;
+
 }
 
 

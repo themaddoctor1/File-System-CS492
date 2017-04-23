@@ -9,7 +9,7 @@ void free_str_vec(char**);
 /**
  * Executes a command in the file system.
  */
-int cmd_exec(char *argv[]);
+void cmd_exec(char *argv[]);
 
 /**
  * Modifies the working directory.
