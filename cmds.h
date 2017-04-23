@@ -40,7 +40,7 @@ int cmd_exit(char *argv[]);   /* TODO: Implement */
 /**
  * Breadth-first print of file structure.
  */
-int cmd_dir(char *argv[]);    /* TODO: Implement */
+int cmd_dir(char *argv[]);
 
 /**
  * Print file/disk info.

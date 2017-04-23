@@ -393,9 +393,7 @@ int cmd_dir(char *argv[]) {
         root = getWorkDirNode();
     else {
         char **dirtoks = str_to_vec(argv[1], '/');
-
         root = getRelTree(getWorkDirNode(), dirtoks);
-
         free_str_vec(dirtoks);
     }
     
@@ -407,14 +405,17 @@ int cmd_dir(char *argv[]) {
         char **path = pathVecOfTree(curr);
         int i;
         
+        /* Files will be printed in blue bold */
         if (!isTreeFile(curr))
             printf("\033[1m\033[34m");
-
+        
+        /* Print each file layer */
         for (i = 0; path[i]; i++)
             printf("%s%s", path[i],
                 path[i+1] ? "/" : ""
         );
-
+        
+        /* Reset colors if necessary */
         if (!isTreeFile(curr))
             printf("/\033[0m");
 
