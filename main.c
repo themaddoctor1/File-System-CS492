@@ -209,8 +209,16 @@ int main(int argc, char *argv[]) {
         int n, len;
         
         len = 0;
+        
+        printf("\033[1m\033[32m" "root@filesystem\033[0m:\033[1m\033[34m");
+        
+        /* Show path */
+        arg_vec = pathVecOfTree(getWorkDirNode());
+        for (n = 0; arg_vec[n]; n++)
+            printf("%s%s", arg_vec[n], arg_vec[n+1] ? "/" : "");
+        free_str_vec(arg_vec);
 
-        printf("$ ");
+        printf("\033[0m$ ");
         fflush(stdout);
 
         /* Read from stdin */
