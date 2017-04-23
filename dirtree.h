@@ -84,4 +84,12 @@ char* getTreeFilename(DirTree tree);
  */
 LList getDirTreeChildren(DirTree tree);
 
+char** pathVecOfTree(DirTree tree);
+
+void updateFileSize(DirTree, long);
+
+/* Memory assignment functions */
+void assignMemoryBlock(DirTree, long);
+long releaseMemoryBlock(DirTree);
+
 #endif

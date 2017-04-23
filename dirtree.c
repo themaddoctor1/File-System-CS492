@@ -1,5 +1,6 @@
 #include "linkedlist.h"
 #include "dirtree.h"
+#include "cmds.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -34,7 +35,6 @@ struct dirtree {
 /**
  * Creates a directory node. Duplicates the name w/ strdup().
  */
- 
 DirTree makeDirTree(char *name, int is_file) {
     DirTree node = (DirTree) malloc(sizeof(struct dirtree));
     node->name = strdup(name);
@@ -298,6 +298,79 @@ LList getDirTreeChildren(DirTree tree) {
 
     return list;
 
+}
+
+char** pathVecOfTree(DirTree tree) {
+    char *name;
+    char **vec;
+
+    if (!tree)
+        return NULL;
+    
+    name = tree->name;
+    
+    if (tree->parent_dir == NULL || tree->parent_dir == tree) {
+        /* Tree is root */
+        vec = (char**) malloc(2*sizeof(char*));
+        vec[0] = strdup(name);
+        vec[1] = NULL;
+    } else {
+        /* Tree is not root */
+        char **par_vec = pathVecOfTree(tree->parent_dir);
+        int i;
+
+        for (i = 0; par_vec[i]; i++);
+        par_vec[i] = strdup(name);
+        
+        vec = realloc(par_vec, (i+2) * sizeof(char*));
+        if (!vec) {
+            vec = (char**) malloc((i+2) * sizeof(char*));
+            memcpy(vec, par_vec, (i+1) * sizeof(char*));
+            free_str_vec(par_vec);
+        }
+
+        vec[i+1] = NULL;
+        
+        return vec;
+
+
+    }
+
+    return vec;
+
+}
+
+void updateFileSize(DirTree tree, long newSize) {
+    if (tree && tree->is_file)
+        tree->file_dta.size = newSize;
+}
+
+void assignMemoryBlock(DirTree tree, long blk) {
+    long *tmp;
+
+    if (!tree)
+        return;
+    else if (!(tree->is_file))
+        return;
+    
+    tmp = (long*) malloc(sizeof(long));
+    *tmp = blk;
+
+    addToLL(tree->file_dta.blocks, 0, tmp);
+}
+
+long releaseMemoryBlock(DirTree tree) {
+    long *res;
+    long val;
+
+    if (!tree || !(tree->is_file))
+        return -1;
+
+    res = (long*) remFromLL(tree->file_dta.blocks, 0);
+    val = *res;
+    free(res);
+
+    return val;
 }
 
 

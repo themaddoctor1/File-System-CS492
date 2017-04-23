@@ -383,9 +383,60 @@ int cmd_exit(char *argv[]) {
 
 }
 
-
 int cmd_dir(char *argv[]) {
-    error_message(argv[0], "Not yet implemented."); return 0;
+    
+    DirTree root;
+    LList bfs_list = makeLL();
+    
+    /* Get the top directory of the BFS */
+    if (!argv[1])
+        root = getWorkDirNode();
+    else {
+        char **dirtoks = str_to_vec(argv[1], '/');
+
+        root = getRelTree(getWorkDirNode(), dirtoks);
+
+        free_str_vec(dirtoks);
+    }
+    
+    appendToLL(bfs_list, root);
+
+    while (!isEmptyLL(bfs_list)) {
+        DirTree curr = (DirTree) remFromLL(bfs_list, 0);
+        
+        char **path = pathVecOfTree(curr);
+        int i;
+        
+        if (!isTreeFile(curr))
+            printf("\033[1m\033[34m");
+
+        for (i = 0; path[i]; i++)
+            printf("%s%s", path[i],
+                path[i+1] ? "/" : ""
+        );
+
+        if (!isTreeFile(curr))
+            printf("/\033[0m");
+
+        printf("\n");
+
+        if (!isTreeFile(curr)) {
+            /* Is a directory; add all children */
+            LList children = getDirTreeChildren(curr);
+
+            while (!isEmptyLL(children))
+                appendToLL(bfs_list, remFromLL(children, 0));
+
+            free(children);
+
+        }
+
+    }
+
+    free(bfs_list);
+
+    return 0;
+    
 }
 
 
