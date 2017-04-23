@@ -69,8 +69,19 @@ long numFilesInTreeDir(DirTree tree, char *dir[], int recursive);
  */
 long treeFileSize(DirTree tree, char *filepath[]);
 
+/**
+ * Whether or not a given tree root is a directory
+ */
 int isTreeFile(DirTree tree);
+
+/**
+ * The name of the given tree directory or file.
+ */
 char* getTreeFilename(DirTree tree);
+
+/**
+ * The children of the given tree root.
+ */
 LList getDirTreeChildren(DirTree tree);
 
 #endif
