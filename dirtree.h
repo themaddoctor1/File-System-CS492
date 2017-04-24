@@ -3,6 +3,8 @@
 
 #include "linkedlist.h"
 
+#include <time.h>
+
 struct dirtree;
 typedef struct dirtree* DirTree;
 
@@ -85,6 +87,8 @@ char* getTreeFilename(DirTree tree);
 LList getDirTreeChildren(DirTree tree);
 
 char** pathVecOfTree(DirTree tree);
+
+time_t getTreeTimestamp(DirTree);
 
 void updateFileSize(DirTree, long);
 

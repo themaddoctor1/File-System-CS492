@@ -25,6 +25,9 @@ struct dirtree {
     /* The parent directory */
     DirTree parent_dir;
 
+    /* Timestamp of when the node was last changed. */
+    time_t timestamp;
+
     union {
         struct filedata file_dta;
         struct dirdata  dir_dta;
@@ -48,6 +51,8 @@ DirTree makeDirTree(char *name, int is_file) {
         /* Default case: node is its own parent */
         node->parent_dir = node;
     }
+
+    node->timestamp = time(NULL);
 
     return node;
 }
@@ -338,6 +343,13 @@ char** pathVecOfTree(DirTree tree) {
 
     return vec;
 
+}
+
+time_t getTreeTimestamp(DirTree tree) {
+    if (tree)
+        return tree->timestamp;
+    else
+        return time(NULL);
 }
 
 void updateFileSize(DirTree tree, long newSize) {

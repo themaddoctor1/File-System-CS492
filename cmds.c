@@ -71,6 +71,73 @@ void error_message(char *cmd, char *mssg) {
     printf("%s: Cannot perform operation: %s\n", cmd, mssg);
 }
 
+/* Print an ls -l esque line */
+void printTreeNode(DirTree node, int fullpath, int details) {
+    
+    char *filename;
+    char buff[32];
+
+    int is_file;
+    long filesize;
+
+    if (!node)
+        return;
+
+    is_file = isTreeFile(node);
+    filesize = treeFileSize(node, NULL);
+    filename = getTreeFilename(node);
+    
+    if (details) {
+        time_t time = getTreeTimestamp(node);
+        struct tm* timestamp = localtime(&time);
+
+        strftime(buff, 32*sizeof(char), "%b %d %H:%M", timestamp);
+        printf("%-15s ", buff);
+        printf("%-15ld ", filesize);
+
+    }
+    
+    /* Blue bold for the files */
+    if (!is_file)
+        printf("\033[1m\033[34m");
+
+    if (fullpath) {
+        /* Show full path */
+        char **path = pathVecOfTree(node);
+        int i;
+        
+        /* Print each file layer */
+        for (i = 0; path[i]; i++)
+            printf("%s%s", path[i],
+                path[i+1] ? "/" : ""
+        );
+
+        free_str_vec(path);
+
+    } else
+        printf("%s", filename);
+    
+    if (!is_file)
+            printf("/");
+
+    printf("\033[0m\n");
+ 
+            /*
+            int is_file = isTreeFile(file);
+             
+            printf("%s%s%s", 
+                is_file ? "" : "\033[1m\033[34m",
+                getTreeFilename(file),
+                "\033[0m");
+            
+            *//* Prints only if the child is a file *//*
+            if (is_file)
+                printf(" - %ldB",treeFileSize(file, NULL));
+
+            printf("\n");
+            */   
+}
+
 /**
  * Runs a command.
  *
@@ -176,18 +243,8 @@ int cmd_ls(char *argv[]) {
         /* Go through each file, removing from the list as it goes */
         while (!isEmptyLL(files)) {
             DirTree file = (DirTree) remFromLL(files, 0);
-            int is_file = isTreeFile(file);
-             
-            printf("%s%s%s", 
-                is_file ? "" : "\033[1m\033[34m",
-                getTreeFilename(file),
-                "\033[0m");
-            
-            /* Prints only if the child is a file */
-            if (is_file)
-                printf(" - %ldB",treeFileSize(file, NULL));
 
-            printf("\n");
+            printTreeNode(file, 0, 1);
         }
         
         /* Delete the list */
@@ -401,26 +458,9 @@ int cmd_dir(char *argv[]) {
 
     while (!isEmptyLL(bfs_list)) {
         DirTree curr = (DirTree) remFromLL(bfs_list, 0);
-        
-        char **path = pathVecOfTree(curr);
-        int i;
-        
-        /* Files will be printed in blue bold */
-        if (!isTreeFile(curr))
-            printf("\033[1m\033[34m");
-        
-        /* Print each file layer */
-        for (i = 0; path[i]; i++)
-            printf("%s%s", path[i],
-                path[i+1] ? "/" : ""
-        );
-        
-        /* Reset colors if necessary */
-        if (!isTreeFile(curr))
-            printf("/\033[0m");
 
-        printf("\n");
-
+        printTreeNode(curr, 1, 0);
+        
         if (!isTreeFile(curr)) {
             /* Is a directory; add all children */
             LList children = getDirTreeChildren(curr);
@@ -442,7 +482,47 @@ int cmd_dir(char *argv[]) {
 
 
 int cmd_prfiles(char *argv[]) {
-    error_message(argv[0], "Not yet implemented."); return 0;
+    DirTree root;
+    LList bfs_list = makeLL();
+    
+    /* Get the top directory of the BFS */
+    if (!argv[1])
+        root = getWorkDirNode();
+    else {
+        char **dirtoks = str_to_vec(argv[1], '/');
+        root = getRelTree(getWorkDirNode(), dirtoks);
+        free_str_vec(dirtoks);
+    }
+    
+    appendToLL(bfs_list, root);
+
+    while (!isEmptyLL(bfs_list)) {
+        DirTree curr = (DirTree) remFromLL(bfs_list, 0);
+        
+        /* Print data */
+        printTreeNode(curr, 1, 1);
+        
+        /* Print block information */
+
+        
+        /* Breadth-first recursive definition */
+        if (!isTreeFile(curr)) {
+            /* Is a directory; add all children */
+            LList children = getDirTreeChildren(curr);
+
+            while (!isEmptyLL(children))
+                appendToLL(bfs_list, remFromLL(children, 0));
+
+            free(children);
+
+        }
+
+    }
+
+    free(bfs_list);
+
+    return 0;
+
 }
 
 
