@@ -6,15 +6,16 @@ typedef struct linkedlist* LList;
 
 
 LList makeLL();
+LList cloneLL(LList);
 
-int sizeOfLL(LList l);
-int isEmptyLL(LList l);
+int sizeOfLL(LList);
+int isEmptyLL(LList);
 
-void* getFromLL(LList l, int idx);
-int indexOfLL(LList l, void *val);
+void* getFromLL(LList, int idx);
+int indexOfLL(LList, void *val);
 
-void appendToLL(LList l, void *val);
-void addToLL(LList l, int idx, void *val);
+void appendToLL(LList, void *val);
+void addToLL(LList, int idx, void *val);
 
 void* remFromLL(LList l, int idx);
 

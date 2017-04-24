@@ -1,5 +1,4 @@
-#ifndef _LINKEDLIST_H_
-#define _LINKEDLIST_H_
+#include "linkedlist.h"
 
 #include <stdlib.h>
 
@@ -19,6 +18,21 @@ LList makeLL() {
     LList list = (LList) malloc(sizeof(struct linkedlist));
     list->head = NULL;
     return list;
+}
+
+LList cloneLL(LList l) {
+    LList clone = makeLL();
+    
+    if (l) {
+        LLnode curr = l->head;
+        while (curr) {
+            appendToLL(clone, curr->val);
+            curr = curr->next;
+        }
+    }
+
+    return clone;
+
 }
 
 
@@ -178,5 +192,3 @@ void* remFromLL(LList l, int idx) {
     
 }
 
-
-#endif
