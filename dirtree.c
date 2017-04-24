@@ -352,6 +352,15 @@ time_t getTreeTimestamp(DirTree tree) {
         return time(NULL);
 }
 
+LList getTreeFileBlocks(DirTree file) {
+    
+    if (!file || !(file->is_file))
+        return NULL;
+    else
+        return cloneLL(file->file_dta.blocks);
+
+}
+
 void updateFileSize(DirTree tree, long newSize) {
     if (tree && tree->is_file)
         tree->file_dta.size = newSize;

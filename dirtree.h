@@ -77,18 +77,15 @@ long treeFileSize(DirTree tree, char *filepath[]);
 int isTreeFile(DirTree tree);
 
 /**
- * The name of the given tree directory or file.
- */
-char* getTreeFilename(DirTree tree);
-
-/**
  * The children of the given tree root.
  */
 LList getDirTreeChildren(DirTree tree);
 
 char** pathVecOfTree(DirTree tree);
 
+char* getTreeFilename(DirTree tree);
 time_t getTreeTimestamp(DirTree);
+LList getTreeFileBlocks(DirTree);
 
 void updateFileSize(DirTree, long);
 

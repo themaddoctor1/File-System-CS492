@@ -45,7 +45,7 @@ int cmd_dir(char *argv[]);
 /**
  * Print file/disk info.
  */
-int cmd_prfiles(char *argv[]); /* TODO: Implement */
+int cmd_prfiles(char *argv[]);
 int cmd_prdisks(char *argv[]); /* TODO: Implement */
 
 #endif

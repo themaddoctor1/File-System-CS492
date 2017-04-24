@@ -499,12 +499,7 @@ int cmd_prfiles(char *argv[]) {
     while (!isEmptyLL(bfs_list)) {
         DirTree curr = (DirTree) remFromLL(bfs_list, 0);
         
-        /* Print data */
-        printTreeNode(curr, 1, 1);
-        
-        /* Print block information */
-
-        
+                        
         /* Breadth-first recursive definition */
         if (!isTreeFile(curr)) {
             /* Is a directory; add all children */
@@ -514,6 +509,57 @@ int cmd_prfiles(char *argv[]) {
                 appendToLL(bfs_list, remFromLL(children, 0));
 
             free(children);
+
+        } else {
+            /* Get block information */
+            LList blocks = getTreeFileBlocks(curr);
+            int num_blks = sizeOfLL(blocks);
+            long *blks = (long*) malloc(num_blks * sizeof(long));
+            int i;
+            
+            /* For printing */
+            int contig = 0;
+            
+            /* Print basic file data */
+            printTreeNode(curr, 1, 1);
+            
+            /* Dequeue each block number */
+            for (i = 0; i < num_blks; i++)
+                blks[i] = *((long*) getFromLL(blocks, 0));
+            free(blocks);
+
+            printf("%i blocks%s", num_blks, num_blks ? ": " : "");
+
+            for (i = 0; i < num_blks-1; i++) {
+                int j;
+                int best = i;
+                long swp;
+                
+                for(j = i+1; j < num_blks; j++) {
+                    if (blks[j] < blks[best])
+                        best = j;
+                }
+                
+                swp = blks[i];
+                blks[i] = blks[best];
+                blks[best] = swp;
+
+                if (i > 0 && blks[i] - 1 == blks[i-1]) {
+                    if (!contig) {
+                        printf("-");
+                        contig = 1;
+                    } 
+                } else {
+                    if (contig) {
+                        printf("%ld", blks[i]);
+                        contig = 0;
+                    } else
+                        printf(" %ld", blks[i]);
+                }
+            }
+
+            printf("\n");
+
 
         }
 
