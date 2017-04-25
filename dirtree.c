@@ -281,8 +281,8 @@ char* getTreeFilename(DirTree tree) {
 LList getDirTreeChildren(DirTree tree) {
     LList list = makeLL();
     int i;
-
-    if (tree->is_file)
+    
+    if (!tree || tree->is_file)
         return list;
     
     /* Add each item in alphabetical order */

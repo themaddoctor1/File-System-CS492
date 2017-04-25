@@ -282,6 +282,14 @@ int cmd_mkdir(char *argv[]) {
             
             /* Get the potential parent node */
             tgtDir = getRelTree(getWorkDirNode(), path);
+
+            if (!tgtDir) {
+                /* The containing path does not exist. */
+                printf("mkdir: Cannot make directory '%s': No such file or directory\n", argv[i]);
+                i++;
+                continue;
+            }
+
             files = getDirTreeChildren(tgtDir);
 
             for (j = sizeOfLL(files) - 1; j >= 0; j--) {
@@ -289,7 +297,7 @@ int cmd_mkdir(char *argv[]) {
 
                 if (!strcmp(getTreeFilename(file), argv[i])) {
                     /* Don't make duplicate directories */
-                    printf("mkdir: Cannot make directory '%s': Already exists.\n", argv[i]);
+                    printf("mkdir: Cannot make directory '%s': Already exists\n", argv[i]);
                     errCode = 1;
                     break;
                 }
@@ -396,19 +404,25 @@ int cmd_delete(char *argv[]) {
     } else {
         int errCode = 0;
         int i = 1;
+        
+        /* TODO: Handle freeing memory on file deletion (requires implementing remove) */
+        printf("\033[1m\033[33mWarning\033[0m: delete does not currently handle memory free for files\n");
 
         while (argv[i]) {
             char **path = str_to_vec(argv[i], '/');
             DirTree tgt = getRelTree(getWorkDirNode(), path);
             int n;
-            
+
             if (!tgt) {
                 errCode = 1;
                 n = 1;
-            } else if (isTreeFile(tgt))
+            } else if (isTreeFile(tgt)) {
+                /* Handle file removal */
                 n = rmfileFromTree(tgt, NULL);
-            else
+            } else {
+                /* Handle directory removal. */
                 n = rmdirFromTree(tgt, NULL);
+            }
 
             if (n) {
                 errCode = 1;
@@ -429,7 +443,9 @@ int cmd_delete(char *argv[]) {
  * Terminates the program.
  */
 int cmd_exit(char *argv[]) {
-    printf("Note: exit not fully implemented.\n");
+
+    /* TODO: Handle freeing all memory */
+    printf("\033[1m\033[33mWarning\033[0m: exit does not free used memory\n");
     
     if (argv[1])
         exit(atoi(argv[1]));
