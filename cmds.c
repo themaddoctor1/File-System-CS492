@@ -593,6 +593,10 @@ int cmd_prfiles(char *argv[]) {
                         printf(" %ld", blks[i]);
                 }
             }
+            
+            /* Print the last value of necessary */
+            if (contig)
+                printf("%ld", blks[i-1]);
 
             printf("\n");
 
