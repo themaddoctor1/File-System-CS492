@@ -484,11 +484,13 @@ int cmd_dir(char *argv[]) {
         free_str_vec(dirtoks);
     }
     
+    /* Initial value is the root */
     appendToLL(bfs_list, root);
-
+    
     while (!isEmptyLL(bfs_list)) {
         DirTree curr = (DirTree) remFromLL(bfs_list, 0);
-
+        
+        /* Print the front file */
         printTreeNode(curr, 1, 0);
         
         if (!isTreeFile(curr)) {
@@ -528,7 +530,6 @@ int cmd_prfiles(char *argv[]) {
 
     while (!isEmptyLL(bfs_list)) {
         DirTree curr = (DirTree) remFromLL(bfs_list, 0);
-        
                         
         /* Breadth-first recursive definition */
         if (!isTreeFile(curr)) {
@@ -544,6 +545,8 @@ int cmd_prfiles(char *argv[]) {
             /* Get block information */
             LList blocks = getTreeFileBlocks(curr);
             int num_blks = sizeOfLL(blocks);
+
+            /* Used as a scratch space for printing. */
             long *blks = (long*) malloc(num_blks * sizeof(long));
             int i;
             
@@ -600,7 +603,8 @@ int cmd_prfiles(char *argv[]) {
         }
 
     }
-
+    
+    /* Dispose of the list */
     free(bfs_list);
 
     return 0;
