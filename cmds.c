@@ -421,7 +421,21 @@ int cmd_delete(char *argv[]) {
                 n = rmfileFromTree(tgt, NULL);
             } else {
                 /* Handle directory removal. */
-                n = rmdirFromTree(tgt, NULL);
+                LList children = getDirTreeChildren(tgt);
+                
+                /* Allow deletion if the directory is empty */
+                if (isEmptyLL(children))
+                    n = rmdirFromTree(tgt, NULL);
+                else {
+                    n = 0;
+                    errCode = 1;
+                    printf("delete: failed to remove '%s': Directory not empty\n", argv[i]);
+                }
+                
+                /* Free the child list */
+                while(!isEmptyLL(children))
+                    remFromLL(children, 0);
+                free(children);
             }
 
             if (n) {
