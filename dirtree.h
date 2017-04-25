@@ -10,8 +10,16 @@ typedef struct dirtree* DirTree;
 
 long BLOCK_SIZE;
 
+/**
+ * Creates a directory tree that is either an extendable
+ * node (directory) or a leaf node (file)
+ */
 DirTree makeDirTree(char *name, int is_file);
 
+/**
+ * Gets the subtree, supertree or relative tree of the given tree
+ * found by following the given path.
+ */
 DirTree getDirSubtree(DirTree tree, char *path[]);
 
 /**
@@ -81,16 +89,51 @@ int isTreeFile(DirTree tree);
  */
 LList getDirTreeChildren(DirTree tree);
 
+/**
+ * Generates the path vector of a given directory or file node.
+ */
 char** pathVecOfTree(DirTree tree);
 
+/**
+ * Gets and returns the name of a given DirTree node.
+ */
 char* getTreeFilename(DirTree tree);
+
+/**
+ * Gets the last access time of the given node.
+ */
 time_t getTreeTimestamp(DirTree);
-LList getTreeFileBlocks(DirTree);
+
+/**
+ * Retrieves a copy of the block list for a given file node.
+ *
+ * file - A DirTree that is known to be a file.
+ *
+ * return - A clone of the block list.
+ */
+LList getTreeFileBlocks(DirTree file);
 
 void updateFileSize(DirTree, long);
 
-/* Memory assignment functions */
-void assignMemoryBlock(DirTree, long);
-long releaseMemoryBlock(DirTree);
+/**
+ * Assigns a block of memory to a file.
+ * precondition - Block b has already been allocated.
+ *
+ * file - A DirTree node that corresponds to a file that shoud
+ *        receive the given block for use.
+ * b    - The id of an allocated block.
+ */
+void assignMemoryBlock(DirTree file, long b);
+
+/**
+ * Revokes a block of memory from a file. Assumes that the user
+ * will follow up by freeing the provided block id.
+ *
+ * file - A DirTree corresponding to a file.
+ * 
+ * return - The id of a block to be freed. The block will be an
+ *          allocated block unless it was somehow freed.
+ */
+long releaseMemoryBlock(DirTree file);
 
 #endif
