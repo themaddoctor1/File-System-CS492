@@ -457,16 +457,16 @@ int cmd_delete(char *argv[]) {
  * Terminates the program.
  */
 int cmd_exit(char *argv[]) {
-
-    /* TODO: Handle freeing all memory */
-    printf("\033[1m\033[33mWarning\033[0m: exit does not free used memory\n");
+    
+    /* Cleans the filesystem. */
+    flush_filesystem();
     
     if (argv[1])
         exit(atoi(argv[1]));
     else
         exit(0);
 
-    return 0;
+    return 1;
 
 }
 

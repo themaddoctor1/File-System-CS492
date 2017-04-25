@@ -8,6 +8,13 @@
  */
 void init_filesystem(long blks, long size);
 
+/**
+ * Nullifies the filesystem (init_filesystem will need to be re-called).
+ * EQUIVALENT TO 'sudo rm -rf /' with any relevant flags. Frees any memory
+ * associated with the simulated filesystem.
+ */
+void flush_filesystem();
+
 DirTree getRootNode();
 DirTree getWorkDirNode();
 

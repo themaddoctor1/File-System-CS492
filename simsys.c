@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
-long BLOCK_SIZE;
-long NUM_BLOCKS;
+long BLOCK_SIZE = 0;
+long NUM_BLOCKS = 0;
 
 DirTree ROOT_DIR = NULL;
 DirTree WORK_DIR = NULL;
@@ -46,6 +46,24 @@ void init_filesystem(long blks, long size) {
     
     /* The list of memory allocations. */
     MEM_ALLOC = makeLL();
+}
+
+void flush_filesystem() {
+    
+    WORK_DIR = NULL;
+
+    /* Recursively destroy the file tree */
+    flushDirTree(ROOT_DIR);
+    
+    /* Dispose of memory allocation */
+    while(!isEmptyLL(MEM_ALLOC))
+        free(remFromLL(MEM_ALLOC, 0));
+    free(MEM_ALLOC);
+    MEM_ALLOC = NULL;
+
+    BLOCK_SIZE = 0;
+    NUM_BLOCKS = 0;
+
 }
 
 DirTree getRootNode() {

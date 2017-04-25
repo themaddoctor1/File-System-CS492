@@ -62,6 +62,38 @@ DirTree makeDirTree(char *name, int is_file) {
     return node;
 }
 
+void flushDirTree(DirTree tree) {
+    
+    if (tree->is_file) {
+
+        /* Remove and free every value from the block allocation. */
+        while (!isEmptyLL(tree->file_dta.blocks))
+            free(remFromLL(tree->file_dta.blocks, 0));
+        
+        /* Then, free the list */
+        free(tree->file_dta.blocks);
+        tree->file_dta.blocks = NULL;
+    } else {
+        /* Flush every subtree */
+        while (!isEmptyLL(tree->dir_dta.files)) {
+            DirTree subtree = (DirTree) remFromLL(tree->dir_dta.files, 0);
+            flushDirTree(subtree);
+        }
+
+        /* Free and zero */
+        free(tree->dir_dta.files);
+        tree->dir_dta.files = NULL;
+
+        tree->parent_dir = NULL;
+
+    }
+    
+    /* Final frees */
+    free(tree->name);
+    tree->is_file = 0;
+    free(tree);
+}
+
 /**
  * Gets the directory node associated with the given path.
  * path - The tokenized path

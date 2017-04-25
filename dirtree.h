@@ -12,9 +12,15 @@ long BLOCK_SIZE;
 
 /**
  * Creates a directory tree that is either an extendable
- * node (directory) or a leaf node (file)
+ * node (directory) or a leaf node (file).
  */
 DirTree makeDirTree(char *name, int is_file);
+
+/**
+ * Disposes of a tree and any subtrees it has. The given
+ * tree and any affected data will be freed.
+ */
+void flushDirTree(DirTree tree);
 
 /**
  * Gets the subtree, supertree or relative tree of the given tree
