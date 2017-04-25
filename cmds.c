@@ -559,7 +559,8 @@ int cmd_prfiles(char *argv[]) {
             free(blocks);
 
             printf("%i blocks%s", num_blks, num_blks ? ": " : "");
-
+            
+            /* Insertion sort the blocks */
             for (i = 0; i < num_blks-1; i++) {
                 int j;
                 int best = i;
@@ -570,10 +571,12 @@ int cmd_prfiles(char *argv[]) {
                         best = j;
                 }
                 
+                /* Swap */
                 swp = blks[i];
                 blks[i] = blks[best];
                 blks[best] = swp;
-
+                
+                /* Format print the blocks. */
                 if (i > 0 && blks[i] - 1 == blks[i-1]) {
                     if (!contig) {
                         printf("-");
@@ -581,7 +584,7 @@ int cmd_prfiles(char *argv[]) {
                     } 
                 } else {
                     if (contig) {
-                        printf("%ld", blks[i]);
+                        printf("%ld %ld", blks[i-1], blks[i]);
                         contig = 0;
                     } else
                         printf(" %ld", blks[i]);
@@ -589,6 +592,9 @@ int cmd_prfiles(char *argv[]) {
             }
 
             printf("\n");
+
+            /* Free the array */
+            free(blks);
 
 
         }
