@@ -35,7 +35,7 @@ int cmd_delete(char *argv[]);
 /**
  * Terminate program.
  */
-int cmd_exit(char *argv[]);   /* TODO: Implement */
+int cmd_exit(char *argv[]);
 
 /**
  * Breadth-first print of file structure.
