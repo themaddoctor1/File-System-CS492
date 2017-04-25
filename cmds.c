@@ -167,8 +167,8 @@ void cmd_exec(char *argv[]) {
         cmd = cmd_dir;
     else if (!strcmp(name, "prfiles"))
         cmd = cmd_prfiles;
-    else if (!strcmp(name, "prdisks"))
-        cmd = cmd_prdisks;
+    else if (!strcmp(name, "prdisk"))
+        cmd = cmd_prdisk;
     else {
         printf("%s: command not found.\n", argv[0]);
         return;
@@ -616,8 +616,46 @@ int cmd_prfiles(char *argv[]) {
 }
 
 
-int cmd_prdisks(char *argv[]) {
-    error_message(argv[0], "Not yet implemented."); return 0;
+int cmd_prdisk(char *argv[]) {
+    
+    LList sectors = getAllocData();
+    long alloc = 0;
+    long net_alloc = 0;
+    long lo = 0;
+    long hi = 0;
+
+    while (!isEmptyLL(sectors)) {
+        /* Low value of the next sector */
+        lo = *((long*) remFromLL(sectors, 0));
+        
+        if (hi != lo-1)
+            printf("Free: %ld - %ld\n", hi, lo-1);
+        
+        /* High value of the sector */
+        hi = *((long*) remFromLL(sectors, 0));
+
+        printf("Used: %ld - %ld\n", lo, hi-1);
+
+        alloc += hi - lo;
+        net_alloc = hi;
+
+    }
+    
+    /* Free the list */
+    free(sectors);
+    
+    /* Print the last of the allocated memory */
+    lo = hi;
+    hi = numBlocks();
+
+    if (hi != lo)
+        printf("Free: %ld - %ld\n", lo, hi-1);
+
+    printf("\nTotal allocation: %ld blocks\n", net_alloc);
+
+    return 0;
+
+
 }
 
 

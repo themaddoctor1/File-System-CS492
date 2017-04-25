@@ -22,6 +22,9 @@ void setWorkDirNode(DirTree);
  */
 long blockSize();
 
+/* The total number of blocks available on the system */
+long numBlocks();
+
 /**
  * Frees a given block of memory.
  *
@@ -45,6 +48,11 @@ long allocBlock();
  * return - Whether or not n blocks can be requested.
  */
 int enoughMemFor(long n);
+
+/**
+ * Get the list of allocated sectors.
+ */
+LList getAllocData();
 
 /**
  * Gets a relative node in the tree structure.

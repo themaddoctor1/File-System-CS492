@@ -64,6 +64,10 @@ long blockSize() {
     return BLOCK_SIZE;
 }
 
+long numBlocks() {
+    return NUM_BLOCKS;
+}
+
 void freeBlock(long blk) {
     int sectors = sizeOfLL(MEM_ALLOC);
     long lo, hi;
@@ -209,6 +213,10 @@ int enoughMemFor(long amt) {
     /* Answer the question */
     return amt <= avail;
 
+}
+
+LList getAllocData() {
+    return cloneLL(MEM_ALLOC);
 }
 
 DirTree getRelTree(DirTree tree, char **path) {
