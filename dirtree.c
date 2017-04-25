@@ -44,15 +44,20 @@ DirTree makeDirTree(char *name, int is_file) {
     node->is_file = is_file;
 
     if (is_file) {
+        /* Starts as 0 byte file */
         node->file_dta.size = 0;
+        
+        /* Create block list */
+        node->file_dta.blocks = makeLL();
     } else {
         node->dir_dta.files = makeLL();
 
         /* Default case: node is its own parent */
         node->parent_dir = node;
     }
-
-    node->timestamp = time(NULL);
+    
+    /* Update the timestamp */
+    updateTimestamp(node);
 
     return node;
 }
@@ -129,6 +134,9 @@ int addNodeToTree(DirTree tree, char *path[], int is_file) {
 
         /* Add to the file list */
         addToLL(tgtDir->dir_dta.files, 0, file);
+
+        /* Update the parent's timestamp to reflect the change. */
+        updateTimestamp(tgtDir);
         
         /* No error */
         return 0;
@@ -364,6 +372,11 @@ LList getTreeFileBlocks(DirTree file) {
 void updateFileSize(DirTree tree, long newSize) {
     if (tree && tree->is_file)
         tree->file_dta.size = newSize;
+}
+
+void updateTimestamp(DirTree tree) {
+    if (tree)
+        tree->timestamp = time(NULL);
 }
 
 void assignMemoryBlock(DirTree tree, long blk) {

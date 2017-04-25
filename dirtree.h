@@ -113,7 +113,17 @@ time_t getTreeTimestamp(DirTree);
  */
 LList getTreeFileBlocks(DirTree file);
 
+/**
+ * Updates the file with a new size. Should be called whenever
+ * the size of the file changes.
+ */
 void updateFileSize(DirTree, long);
+
+/**
+ * Updates with timestamp of a tree node. Should be called whenever
+ * a file is modified.
+ */
+void updateTimestamp(DirTree);
 
 /**
  * Assigns a block of memory to a file.
