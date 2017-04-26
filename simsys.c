@@ -26,7 +26,7 @@ DirTree WORK_DIR = NULL;
  */
 LList MEM_ALLOC;
 
-void init_filesystem(long blks, long size) {
+void init_filesystem(long blk_size, long size) {
     
     /* Prevent the function from being called more than once. */
     if (ROOT_DIR) {
@@ -35,8 +35,8 @@ void init_filesystem(long blks, long size) {
     }
 
     /* The size of a block and the number of blocks are stored. */
-    BLOCK_SIZE = size / blks;
-    NUM_BLOCKS = blks;
+    BLOCK_SIZE = blk_size;
+    NUM_BLOCKS = 1 + (size-1) / blk_size;
     
     /* The root node of the filesystem. */
     ROOT_DIR = makeDirTree("", 0);
