@@ -405,9 +405,6 @@ int cmd_delete(char *argv[]) {
         int errCode = 0;
         int i = 1;
         
-        /* TODO: Handle freeing memory on file deletion (requires implementing remove) */
-        printf("\033[1m\033[33mWarning\033[0m: delete does not currently handle memory free for files\n");
-
         while (argv[i]) {
             char **path = str_to_vec(argv[i], '/');
             DirTree tgt = getRelTree(getWorkDirNode(), path);
@@ -417,8 +414,20 @@ int cmd_delete(char *argv[]) {
                 errCode = 1;
                 n = 1;
             } else if (isTreeFile(tgt)) {
-                /* Handle file removal */
+                /* The currently allocated memory blocks */
+                LList blocks = getTreeFileBlocks(tgt);
+                
+                /* Free each used memory block one by one */
+                while (!isEmptyLL(blocks)) {
+                    long *blk = (long*) remFromLL(blocks, 0);
+                    freeBlock(*blk);
+                    free(blk);
+                }
+                free(blocks);
+                
+                /* Remove the file */
                 n = rmfileFromTree(tgt, NULL);
+
             } else {
                 /* Handle directory removal. */
                 LList children = getDirTreeChildren(tgt);
