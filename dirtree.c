@@ -255,6 +255,10 @@ int rmfileFromTree(DirTree tree, char *path[]) {
         
         /* Remove the linking from the tree */
         if (parent) {
+
+            /* Update the parent with the change */
+            updateTimestamp(parent);
+
             remFromLL(parent->dir_dta.files, indexOfLL(parent->dir_dta.files, tree));
             tree->parent_dir = NULL;
         }
@@ -293,6 +297,9 @@ int rmdirFromTree(DirTree tree, char *path[]) {
         }
         
         if (parent) {
+            /* Update the parent's timestamp */
+            updateTimestamp(parent);
+
             /* Remove linking with parent */
             remFromLL(parent->dir_dta.files, indexOfLL(parent->dir_dta.files, tree));
             tree->parent_dir = NULL;
