@@ -274,6 +274,14 @@ int cmd_mkdir(char *argv[]) {
             int j, k;
             DirTree tgtDir;
             LList files;
+
+            /* Check whether or not the file already exists */
+            if (getRelTree(getWorkDirNode(), path)) {
+                printf("mkdir: Cannot make directory '%s': Already exists\n", argv[i]);
+                errCode = 1;
+                i++;
+                continue;
+            }
             
             /* Separate the target name and its path */
             for (k = 0; path[k]; k++);
@@ -344,6 +352,16 @@ int cmd_create(char *argv[]) {
             int j, k;
             DirTree tgtDir;
             LList files;
+
+            /* Check whether or not the file already exists */
+            if (getRelTree(getWorkDirNode(), path)) {
+                printf("mkdir: Cannot make file '%s': Already exists\n", argv[i]);
+                errCode = 1;
+                i++;
+                continue;
+            }
+            
+
             
             /* Separate the target name and its path */
             for (k = 0; path[k]; k++);
