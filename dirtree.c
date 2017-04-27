@@ -343,15 +343,19 @@ LList getDirTreeChildren(DirTree tree, int alphabetize) {
     
     if (!tree || tree->is_file)
         return list;
-    else if (!alphabetize)
+    else if (!alphabetize) /* Simply clone if not adjusting order */
         return cloneLL(tree->dir_dta.files);
     
     /* Add each item in alphabetical order */
     for (i = sizeOfLL(tree->dir_dta.files) - 1; i >= 0; i--) {
+        /* Get an item */
         DirTree elem = (DirTree) getFromLL(tree->dir_dta.files, i);
+
+        /* Create a new iterator */
         LLiter iter = makeLLiter(list);
         
         int j;
+        /* Iterate until the needed item is found. */
         for (j = 0; iterHasNextLL(iter); j++) {
             DirTree tst = (DirTree) iterNextLL(iter);
             if (strcmp(tst->name, elem->name) < 0) {
@@ -391,6 +395,7 @@ char** pathVecOfTree(DirTree tree) {
         for (i = 0; par_vec[i]; i++);
         par_vec[i] = strdup(name);
         
+        /* Add to the path */
         vec = realloc(par_vec, (i+2) * sizeof(char*));
         if (!vec) {
             vec = (char**) malloc((i+2) * sizeof(char*));
@@ -437,7 +442,8 @@ void updateTimestamp(DirTree tree) {
 
 void assignMemoryBlock(DirTree tree, long blk) {
     long *tmp;
-
+    
+    /* Edge case checks */
     if (!tree)
         return;
     else if (!(tree->is_file))
