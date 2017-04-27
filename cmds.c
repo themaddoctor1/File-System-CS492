@@ -539,6 +539,50 @@ int cmd_dir(char *argv[]) {
     
 }
 
+/* Used by prfiles for nlogn sort */
+void mergesort_longs(long *list, int lo, int hi) {
+    if (hi - lo == 2) {
+        /* Pair case */
+        if (list[lo] > list[lo+1]) {
+            long tmp = list[lo];
+            list[lo] = list[lo+1];
+            list[lo+1] = tmp;
+        }
+    } else if (hi - lo > 2) {
+        int c = (lo + hi) / 2;
+
+        int i = lo;
+        int j = c;
+        int k = 0;
+
+        mergesort_longs(list, lo, c);
+        mergesort_longs(list, c, hi);
+        
+        long *tmp = (long*) malloc((hi - lo) * sizeof(long));
+        
+        /* Build sorted into the temporary array */
+        while (i < c && j < hi) {
+            if (list[i] < list[j])
+                tmp[k++] = list[i++];
+            else
+                tmp[k++] = list[j++];
+        }
+        
+        while (j < hi)
+            tmp[k++] = list[j++];
+
+        while (i < c)
+            tmp[k++] = list[i++];
+
+        /* Reinsert */
+        while (k--)
+            list[lo+k] = tmp[k];
+
+        free(tmp);
+
+    }
+
+}
 
 int cmd_prfiles(char *argv[]) {
     DirTree root;
@@ -579,33 +623,30 @@ int cmd_prfiles(char *argv[]) {
             
             /* For printing */
             int contig = 0;
+
+            /* Iterator */
+            LLiter iter;
             
             /* Print basic file data */
             printTreeNode(curr, 1, 1);
             
             /* Dequeue each block number */
-            for (i = 0; i < num_blks; i++)
-                blks[i] = *((long*) getFromLL(blocks, 0));
+            iter = makeLLiter(blocks);
+            for (i = 0; iterHasNextLL(iter); i++)
+                blks[i] = *((long*) iterNextLL(iter));
+
             free(blocks);
+            disposeIterLL(iter);
 
             printf("%i blocks%s", num_blks, num_blks ? ": " : "");
             
-            /* Insertion sort the blocks */
-            for (i = 0; i < num_blks-1; i++) {
-                int j;
-                int best = i;
-                long swp;
-                
-                for(j = i+1; j < num_blks; j++) {
-                    if (blks[j] < blks[best])
-                        best = j;
-                }
-                
-                /* Swap */
-                swp = blks[i];
-                blks[i] = blks[best];
-                blks[best] = swp;
-                
+            /* Sort the blocks */
+            mergesort_longs(blks, 0, num_blks);
+
+           
+
+            for (i = 0; i < num_blks; i++) {
+
                 /* Format print the blocks. */
                 if (i > 0 && blks[i] - 1 == blks[i-1]) {
                     if (!contig) {
@@ -621,11 +662,11 @@ int cmd_prfiles(char *argv[]) {
                 }
             }
             
-            /* Print the last value of necessary */
+            /* Print the last value if necessary */
             if (contig)
                 printf("%ld", blks[i-1]);
 
-            printf("\n");
+            printf("\n\n");
 
             /* Free the array */
             free(blks);
