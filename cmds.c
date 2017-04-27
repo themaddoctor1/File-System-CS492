@@ -236,7 +236,7 @@ int cmd_ls(char *argv[]) {
         error_message("ls", "Target is not a directory.\n");
         return 1;
     } else {
-        LList files = getDirTreeChildren(tgt);
+        LList files = getDirTreeChildren(tgt, 1);
 
         printf("total %i\n", sizeOfLL(files));
         
@@ -298,7 +298,7 @@ int cmd_mkdir(char *argv[]) {
                 continue;
             }
 
-            files = getDirTreeChildren(tgtDir);
+            files = getDirTreeChildren(tgtDir, 0);
 
             for (j = sizeOfLL(files) - 1; j >= 0; j--) {
                 DirTree file = (DirTree) getFromLL(files, j);
@@ -370,7 +370,7 @@ int cmd_create(char *argv[]) {
             
             /* Get the potential parent node */
             tgtDir = getRelTree(getWorkDirNode(), path);
-            files = getDirTreeChildren(tgtDir);
+            files = getDirTreeChildren(tgtDir, 0);
 
 
             for (j = sizeOfLL(files) - 1; j >= 0; j--) {
@@ -448,7 +448,7 @@ int cmd_delete(char *argv[]) {
 
             } else {
                 /* Handle directory removal. */
-                LList children = getDirTreeChildren(tgt);
+                LList children = getDirTreeChildren(tgt, 0);
                 
                 /* Allow deletion if the directory is empty */
                 if (isEmptyLL(children))
@@ -522,7 +522,7 @@ int cmd_dir(char *argv[]) {
         
         if (!isTreeFile(curr)) {
             /* Is a directory; add all children */
-            LList children = getDirTreeChildren(curr);
+            LList children = getDirTreeChildren(curr, 1);
 
             while (!isEmptyLL(children))
                 appendToLL(bfs_list, remFromLL(children, 0));
@@ -561,7 +561,7 @@ int cmd_prfiles(char *argv[]) {
         /* Breadth-first recursive definition */
         if (!isTreeFile(curr)) {
             /* Is a directory; add all children */
-            LList children = getDirTreeChildren(curr);
+            LList children = getDirTreeChildren(curr, 1);
 
             while (!isEmptyLL(children))
                 appendToLL(bfs_list, remFromLL(children, 0));

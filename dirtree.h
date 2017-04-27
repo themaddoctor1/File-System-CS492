@@ -35,6 +35,7 @@ DirTree getDirSubtree(DirTree tree, char *path[]);
  * return - An nonzero error code if something went wrong:
  *          1 - File not found
  *          2 - Tried to add file to a file
+ *          3 - Bad argument(s)
  */
 int addDirToTree(DirTree tree, char *path[]);
 
@@ -45,6 +46,7 @@ int addDirToTree(DirTree tree, char *path[]);
  * return - An nonzero error code if something went wrong:
  *          1 - File not found.
  *          2 - Tried to add file to a file
+ *          3 - Bad argument(s)
  */
 int addFileToTree(DirTree tree, char *path[]);
 
@@ -93,7 +95,7 @@ int isTreeFile(DirTree tree);
 /**
  * The children of the given tree root.
  */
-LList getDirTreeChildren(DirTree tree);
+LList getDirTreeChildren(DirTree tree, int alphabetize);
 
 /**
  * Generates the path vector of a given directory or file node.

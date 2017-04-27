@@ -92,7 +92,7 @@ void testDirTree() {
     addDirToTree(root, path);
 
     printf("Retrieving file list\n");
-    LList files = getDirTreeChildren(root);
+    LList files = getDirTreeChildren(root, 1);
 
     printf("Files in root:\n");
     for (i = 0; i < 3; i++) {

@@ -101,7 +101,7 @@ void flushDirTree(DirTree tree) {
  * return - The requested node, or NULL if it doesn't exist.
  */
 DirTree getDirSubtree(DirTree tree, char *path[]) {
-    int i;
+    LLiter iter;
 
     if (!path || !path[0])
         return tree; /* Found the file */
@@ -116,14 +116,22 @@ DirTree getDirSubtree(DirTree tree, char *path[]) {
         return getDirSubtree(tree->parent_dir, &path[1]); /* Go back one directory */
     
     /* Search the subfiles for the next recursive step */
-    for (i = sizeOfLL(tree->dir_dta.files) - 1; i >= 0; i--) {
-        DirTree child = (DirTree) getFromLL(tree->dir_dta.files, i);
+    iter = makeLLiter(tree->dir_dta.files);
+    while (iterHasNextLL(iter)) {
+        
+        /* Get the next item from the iterator */
+        DirTree child = (DirTree) iterNextLL(iter);
 
         if (!strcmp(path[0], child->name)) {
+
+            disposeIterLL(iter);
+        
             /* The child is should be searched through. */
             return getDirSubtree(child, &path[1]);
         }
     }
+
+    disposeIterLL(iter);
 
     return NULL;
 }
@@ -134,6 +142,10 @@ int addNodeToTree(DirTree tree, char *path[], int is_file) {
     char **subpath;
     char *filename;
     
+    /* Error check */
+    if (!path || !path[0])
+        return 3;
+
     /* Make memory space for subpath */
     i = 0;
     while (path[i]) i++;
@@ -325,24 +337,29 @@ char* getTreeFilename(DirTree tree) {
     return tree->name;
 }
 
-LList getDirTreeChildren(DirTree tree) {
+LList getDirTreeChildren(DirTree tree, int alphabetize) {
     LList list = makeLL();
     int i;
     
     if (!tree || tree->is_file)
         return list;
+    else if (!alphabetize)
+        return cloneLL(tree->dir_dta.files);
     
     /* Add each item in alphabetical order */
     for (i = sizeOfLL(tree->dir_dta.files) - 1; i >= 0; i--) {
         DirTree elem = (DirTree) getFromLL(tree->dir_dta.files, i);
+        LLiter iter = makeLLiter(list);
         
         int j;
-        for (j = sizeOfLL(list) - 1; j >= 0; j--) {
-            DirTree tst = (DirTree) getFromLL(list, j);
+        for (j = 0; iterHasNextLL(iter); j++) {
+            DirTree tst = (DirTree) iterNextLL(iter);
             if (strcmp(tst->name, elem->name) < 0) {
                 break;
             }
         }
+
+        disposeIterLL(iter);
 
         addToLL(list, j+1, elem);
 
