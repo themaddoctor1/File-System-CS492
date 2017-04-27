@@ -12,7 +12,11 @@ struct linkedlist {
     LLnode head;
     LLnode tail;
 };
-typedef struct linkedlist* LList;
+
+struct ll_iterator {
+    LLnode curr;
+};
+
 
 LList makeLL() {
     LList list = (LList) malloc(sizeof(struct linkedlist));
@@ -191,4 +195,34 @@ void* remFromLL(LList l, int idx) {
     }
     
 }
+
+LLiter makeLLiter(LList list) {
+    LLiter iter = (LLiter) malloc(sizeof(struct ll_iterator));
+
+    iter->curr = list ? list->head : NULL;
+
+    return iter;
+
+}
+
+int iterHasNextLL(LLiter iter) {
+    return iter->curr != NULL;
+}
+
+void *iterNextLL(LLiter iter) {
+    if (iter && iter->curr) {
+        void *res = iter->curr->val;
+        iter->curr = iter->curr->next;
+        return res;
+    } else
+        return NULL;
+}
+
+void disposeIterLL(LLiter iter) {
+    if (iter) {
+        iter->curr = NULL;
+        free(iter);
+    }
+}
+
 
