@@ -646,8 +646,6 @@ int cmd_prfiles(char *argv[]) {
             /* Sort the blocks */
             mergesort_longs(blks, 0, num_blks);
 
-           
-
             for (i = 0; i < num_blks; i++) {
 
                 /* Format print the blocks. */
