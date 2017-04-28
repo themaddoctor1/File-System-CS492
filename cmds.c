@@ -49,8 +49,11 @@ char** str_to_vec(char *str, char split_c) {
         vec[size] = NULL;
         
         /* Update k */
+        while (str[k+m+n] == split_c)
+            k++;
+
         if (str[k+m+n]) 
-            k += n+m+1;
+            k += n+m;
         else
             return vec;
 

@@ -154,15 +154,8 @@ int main(int argc, char *argv[]) {
         char **pathtoks = str_to_vec(path, '/');
         int n;
         
-        /*
-        printf("Adding /");
-        for (i = 1; pathtoks[i]; i++)
-            printf("%s/", pathtoks[i]);
-        printf("\n");
-        */
-
         /* Add the directory */
-        if ((n = addDirToTree(getRootNode(), &pathtoks[1])))
+        if (pathtoks[1] && (n = addDirToTree(getRootNode(), &pathtoks[1])))
             printf("\033[1m\033[31mError\033[0m: Could not add directory '%s'; error code %i\n", path, n);
 
         free_str_vec(pathtoks);
