@@ -36,7 +36,7 @@ void init_filesystem(long blk_size, long size) {
 
     /* The size of a block and the number of blocks are stored. */
     BLOCK_SIZE = blk_size;
-    NUM_BLOCKS = 1 + (size-1) / blk_size;
+    NUM_BLOCKS = size / blk_size;
     
     /* The root node of the filesystem. */
     ROOT_DIR = makeDirTree("", 0);

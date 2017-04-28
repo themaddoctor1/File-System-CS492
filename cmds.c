@@ -696,7 +696,7 @@ int cmd_prdisk(char *argv[]) {
         /* Low value of the next sector */
         lo = *((long*) remFromLL(sectors, 0));
         
-        if (hi != lo-1)
+        if (lo != hi)
             printf("Free: %ld - %ld\n", hi, lo-1);
         
         /* High value of the sector */
