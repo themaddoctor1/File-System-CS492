@@ -149,6 +149,10 @@ void printTreeNode(DirTree node, int fullpath, int details) {
 void cmd_exec(char *argv[]) {
     SimCmd cmd;
     char *name = argv[0];
+
+    /* Don't need to bother with empty line */
+    if (!argv)
+        return;
     
     if (!strcmp(name, "cd"))
         cmd = cmd_cd;
@@ -182,19 +186,17 @@ void cmd_exec(char *argv[]) {
 
 int cmd_cd(char *argv[]) {
     char **dirtoks;
+    int i = 1;
     
     if (!argv[1]) {
         /* Default is to go to root. */
         setWorkDirNode(getRootNode());
         return 0;
-    } else if (argv[2]) {
-        error_message("cd", "Too many arguments provided.");
-        return 1;
-    } else {
+    } else while (argv[i]) {
         DirTree tgt;
 
         /* Build a token vector */
-        dirtoks = str_to_vec(argv[1], '/');
+        dirtoks = str_to_vec(argv[i], '/');
 
         /* Get the destination */
         tgt = getRelTree(getWorkDirNode(), dirtoks);
@@ -203,16 +205,19 @@ int cmd_cd(char *argv[]) {
         free_str_vec(dirtoks);
         
         if (!tgt) {
-            error_message("cd", "Directory not found.");
+            printf("cd: %s: No such file or directory\n", argv[i]);
             return 1;
         } else if (isTreeFile(tgt)) {
-            error_message("cd", "Target is not a directory.");
+            printf("cd: %s: Target is not a directory\n", argv[i]);
             return 1;
         } else {
             setWorkDirNode(tgt);
-            return 0;
         }
+
+        i++;
     }
+
+    return 0;
 }
 
 /**
@@ -233,10 +238,10 @@ int cmd_ls(char *argv[]) {
         tgt = working_dir;
 
     if (!tgt) {
-        error_message("ls", "Directory not found.\n");
+        printf("ls: cannot access '%s': No such file or directory\n", argv[1]);
         return 1;
     } else if (isTreeFile(tgt)) {
-        error_message("ls", "Target is not a directory.\n");
+        printf("ls: cannot access '%s': Target is not a directory.\n", argv[1]);
         return 1;
     } else {
         LList files = getDirTreeChildren(tgt, 1);
@@ -263,7 +268,7 @@ int cmd_ls(char *argv[]) {
 int cmd_mkdir(char *argv[]) {
     
     if (!argv[1]) {
-        error_message("mkdir", "No directory names provided.");
+        printf("mkdir: missing operand");
         return 1;
     } else {
         /* Get a list of all of the files in the directory */
@@ -280,7 +285,7 @@ int cmd_mkdir(char *argv[]) {
 
             /* Check whether or not the file already exists */
             if (getRelTree(getWorkDirNode(), path)) {
-                printf("mkdir: Cannot make directory '%s': Already exists\n", argv[i]);
+                printf("mkdir: Cannot create directory '%s': Already exists\n", argv[i]);
                 errCode = 1;
                 i++;
                 continue;
@@ -296,7 +301,7 @@ int cmd_mkdir(char *argv[]) {
 
             if (!tgtDir) {
                 /* The containing path does not exist. */
-                printf("mkdir: Cannot make directory '%s': No such file or directory\n", argv[i]);
+                printf("mkdir: cannot make directory '%s': No such file or directory\n", argv[i]);
                 i++;
                 continue;
             }
@@ -308,7 +313,7 @@ int cmd_mkdir(char *argv[]) {
 
                 if (!strcmp(getTreeFilename(file), argv[i])) {
                     /* Don't make duplicate directories */
-                    printf("mkdir: Cannot make directory '%s': Already exists\n", argv[i]);
+                    printf("mkdir: cannot make directory '%s': Already exists\n", argv[i]);
                     errCode = 1;
                     break;
                 }
@@ -358,7 +363,7 @@ int cmd_create(char *argv[]) {
 
             /* Check whether or not the file already exists */
             if (getRelTree(getWorkDirNode(), path)) {
-                printf("mkdir: Cannot make file '%s': Already exists\n", argv[i]);
+                printf("mkdir: cannot make file '%s': Already exists\n", argv[i]);
                 errCode = 1;
                 i++;
                 continue;
@@ -381,7 +386,7 @@ int cmd_create(char *argv[]) {
 
                 if (!strcmp(getTreeFilename(file), argv[i])) {
                     /* Don't make duplicate directories */
-                    printf("create: Cannot make file %s: Already exists.\n", argv[i]);
+                    printf("create: cannot make file %s: Already exists.\n", argv[i]);
                     errCode = 1;
                     break;
                 }
