@@ -22,7 +22,8 @@ void getDirsFromFile(FILE *file, LList dirlist) {
         char *path;
         
         pathbuff[strlen(pathbuff)-1] = '\0';
-        path = strdup(pathbuff);
+        path = (char*) malloc((1 + strlen(pathbuff)) * sizeof(char));
+        strcpy(path, pathbuff);
 
         appendToLL(dirlist, path);
 
@@ -53,7 +54,8 @@ void getFilesFromFile(FILE *file, LList filelist) {
 
         /* Make a data structure */
         struct file_loaddata *dta = (struct file_loaddata*) malloc(sizeof(struct file_loaddata));
-        dta->name = strdup(pathbuff);
+        dta->name = (char*) malloc((strlen(pathbuff) + 1) * sizeof(char));
+        strcpy(dta->name, pathbuff);
         dta->filesize = sizebuff;
         
         /* Add to the list */

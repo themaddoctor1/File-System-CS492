@@ -557,6 +557,8 @@ void mergesort_longs(long *list, int lo, int hi) {
             list[lo+1] = tmp;
         }
     } else if (hi - lo > 2) {
+        long *tmp;
+
         int c = (lo + hi) / 2;
 
         int i = lo;
@@ -566,7 +568,7 @@ void mergesort_longs(long *list, int lo, int hi) {
         mergesort_longs(list, lo, c);
         mergesort_longs(list, c, hi);
         
-        long *tmp = (long*) malloc((hi - lo) * sizeof(long));
+        tmp = (long*) malloc((hi - lo) * sizeof(long));
         
         /* Build sorted into the temporary array */
         while (i < c && j < hi) {

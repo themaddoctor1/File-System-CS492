@@ -220,7 +220,7 @@ int enoughMemFor(long amt) {
        of memory between each block of allocated memory. */
     avail = *((long*) getFromLL(MEM_ALLOC, 0));
     for (i = 1; i < secs && avail < amt; i++) {
-        avail += *((long*) getFromLL(MEM_ALLOC, 2*i-1)),
+        avail += *((long*) getFromLL(MEM_ALLOC, 2*i-1))
                  - *((long*) getFromLL(MEM_ALLOC, 2*i));
     }
     

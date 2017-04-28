@@ -3,7 +3,7 @@ SRCS = $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
 
 CC = gcc
-CFLAGS = -Wall -Werror -pedantic -pthread -g
+CFLAGS = -Wall -Werror -pedantic -pthread -g -std=c99
 
 EXEC = exec
 

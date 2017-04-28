@@ -31,7 +31,7 @@ struct dirtree {
     union {
         struct filedata file_dta;
         struct dirdata  dir_dta;
-    };
+    } nodedata;
 };
 
 
@@ -40,17 +40,20 @@ struct dirtree {
  */
 DirTree makeDirTree(char *name, int is_file) {
     DirTree node = (DirTree) malloc(sizeof(struct dirtree));
-    node->name = strdup(name);
+
+    node->name = (char*) malloc((1 + strlen(name)) * sizeof(char));
+    strcpy(node->name, name);
+
     node->is_file = is_file;
 
     if (is_file) {
         /* Starts as 0 byte file */
-        node->file_dta.size = 0;
+        node->nodedata.file_dta.size = 0;
         
         /* Create block list */
-        node->file_dta.blocks = makeLL();
+        node->nodedata.file_dta.blocks = makeLL();
     } else {
-        node->dir_dta.files = makeLL();
+        node->nodedata.dir_dta.files = makeLL();
 
         /* Default case: node is its own parent */
         node->parent_dir = node;
@@ -67,22 +70,22 @@ void flushDirTree(DirTree tree) {
     if (tree->is_file) {
 
         /* Remove and free every value from the block allocation. */
-        while (!isEmptyLL(tree->file_dta.blocks))
-            free(remFromLL(tree->file_dta.blocks, 0));
+        while (!isEmptyLL(tree->nodedata.file_dta.blocks))
+            free(remFromLL(tree->nodedata.file_dta.blocks, 0));
         
         /* Then, free the list */
-        free(tree->file_dta.blocks);
-        tree->file_dta.blocks = NULL;
+        free(tree->nodedata.file_dta.blocks);
+        tree->nodedata.file_dta.blocks = NULL;
     } else {
         /* Flush every subtree */
-        while (!isEmptyLL(tree->dir_dta.files)) {
-            DirTree subtree = (DirTree) remFromLL(tree->dir_dta.files, 0);
+        while (!isEmptyLL(tree->nodedata.dir_dta.files)) {
+            DirTree subtree = (DirTree) remFromLL(tree->nodedata.dir_dta.files, 0);
             flushDirTree(subtree);
         }
 
         /* Free and zero */
-        free(tree->dir_dta.files);
-        tree->dir_dta.files = NULL;
+        free(tree->nodedata.dir_dta.files);
+        tree->nodedata.dir_dta.files = NULL;
 
         tree->parent_dir = NULL;
 
@@ -116,7 +119,7 @@ DirTree getDirSubtree(DirTree tree, char *path[]) {
         return getDirSubtree(tree->parent_dir, &path[1]); /* Go back one directory */
     
     /* Search the subfiles for the next recursive step */
-    iter = makeLLiter(tree->dir_dta.files);
+    iter = makeLLiter(tree->nodedata.dir_dta.files);
     while (iterHasNextLL(iter)) {
         
         /* Get the next item from the iterator */
@@ -177,7 +180,7 @@ int addNodeToTree(DirTree tree, char *path[], int is_file) {
         file->parent_dir = tgtDir;
 
         /* Add to the file list */
-        addToLL(tgtDir->dir_dta.files, 0, file);
+        addToLL(tgtDir->nodedata.dir_dta.files, 0, file);
 
         /* Update the parent's timestamp to reflect the change. */
         updateTimestamp(tgtDir);
@@ -206,11 +209,11 @@ long filesizeOfDirTree(DirTree tree, char *path[]) {
         
         /* File check */
         if (tree->is_file)
-            return tree->file_dta.size;
+            return tree->nodedata.file_dta.size;
         
         /* Node is a directory, so it is a combo of sizes. */
-        for (int i = sizeOfLL(tree->dir_dta.files) - 1; i >= 0; i--)
-            size += filesizeOfDirTree((DirTree) getFromLL(tree->dir_dta.files, i), NULL);
+        for (int i = sizeOfLL(tree->nodedata.dir_dta.files) - 1; i >= 0; i--)
+            size += filesizeOfDirTree((DirTree) getFromLL(tree->nodedata.dir_dta.files, i), NULL);
 
         return size;
     } else {
@@ -229,12 +232,12 @@ long numFilesInTreeDir(DirTree tree, char *dir[], int rec) {
         long count = 0;
         
         /* Check each subfile */
-        for (i = sizeOfLL(tree->dir_dta.files) - 1; i >= 0; i--) {
-            DirTree sub = getFromLL(tree->dir_dta.files, i);
+        for (i = sizeOfLL(tree->nodedata.dir_dta.files) - 1; i >= 0; i--) {
+            DirTree sub = getFromLL(tree->nodedata.dir_dta.files, i);
 
             /* Only count directories if recursively checking */
             if (sub->is_file)
-                count += sub->file_dta.size;
+                count += sub->nodedata.file_dta.size;
             else
                 count += rec ? numFilesInTreeDir(sub, NULL, rec) : 0;
         }
@@ -247,7 +250,7 @@ long treeFileSize(DirTree tree, char *path[]) {
     DirTree file = path ? getDirSubtree(tree, path) : tree;
 
     if (file->is_file)
-        return file->file_dta.size;
+        return file->nodedata.file_dta.size;
     else
         return 0;
 }
@@ -271,19 +274,19 @@ int rmfileFromTree(DirTree tree, char *path[]) {
             /* Update the parent with the change */
             updateTimestamp(parent);
 
-            remFromLL(parent->dir_dta.files, indexOfLL(parent->dir_dta.files, tree));
+            remFromLL(parent->nodedata.dir_dta.files, indexOfLL(parent->nodedata.dir_dta.files, tree));
             tree->parent_dir = NULL;
         }
 
         /* Handle the destruction of the file */
-        while (sizeOfLL(tree->file_dta.blocks))
-            remFromLL(tree->file_dta.blocks, 0);
+        while (sizeOfLL(tree->nodedata.file_dta.blocks))
+            remFromLL(tree->nodedata.file_dta.blocks, 0);
 
         /* Zero the file data */
-        tree->file_dta.size = 0;
+        tree->nodedata.file_dta.size = 0;
 
-        free(tree->file_dta.blocks);
-        tree->file_dta.blocks = NULL;
+        free(tree->nodedata.file_dta.blocks);
+        tree->nodedata.file_dta.blocks = NULL;
 
         free(tree);
 
@@ -303,7 +306,7 @@ int rmdirFromTree(DirTree tree, char *path[]) {
         if (tree->is_file) {
             /* Node is a file */
             return 2;
-        } else if (sizeOfLL(tree->file_dta.blocks)) {
+        } else if (sizeOfLL(tree->nodedata.file_dta.blocks)) {
             /* Do not allow a directory with contents to be destroyed */
             return 3;
         }
@@ -313,13 +316,13 @@ int rmdirFromTree(DirTree tree, char *path[]) {
             updateTimestamp(parent);
 
             /* Remove linking with parent */
-            remFromLL(parent->dir_dta.files, indexOfLL(parent->dir_dta.files, tree));
+            remFromLL(parent->nodedata.dir_dta.files, indexOfLL(parent->nodedata.dir_dta.files, tree));
             tree->parent_dir = NULL;
         }
 
         /* Zero the file data */
-        free(tree->dir_dta.files);
-        tree->dir_dta.files = NULL;
+        free(tree->nodedata.dir_dta.files);
+        tree->nodedata.dir_dta.files = NULL;
 
         free(tree);
 
@@ -344,12 +347,12 @@ LList getDirTreeChildren(DirTree tree, int alphabetize) {
     if (!tree || tree->is_file)
         return list;
     else if (!alphabetize) /* Simply clone if not adjusting order */
-        return cloneLL(tree->dir_dta.files);
+        return cloneLL(tree->nodedata.dir_dta.files);
     
     /* Add each item in alphabetical order */
-    for (i = sizeOfLL(tree->dir_dta.files) - 1; i >= 0; i--) {
+    for (i = sizeOfLL(tree->nodedata.dir_dta.files) - 1; i >= 0; i--) {
         /* Get an item */
-        DirTree elem = (DirTree) getFromLL(tree->dir_dta.files, i);
+        DirTree elem = (DirTree) getFromLL(tree->nodedata.dir_dta.files, i);
 
         /* Create a new iterator */
         LLiter iter = makeLLiter(list);
@@ -385,7 +388,10 @@ char** pathVecOfTree(DirTree tree) {
     if (tree->parent_dir == NULL || tree->parent_dir == tree) {
         /* Tree is root */
         vec = (char**) malloc(2*sizeof(char*));
-        vec[0] = strdup(name);
+
+        vec[0] = (char*) malloc((1 + strlen(name)) * sizeof(char));
+        strcpy(vec[0], name);
+
         vec[1] = NULL;
     } else {
         /* Tree is not root */
@@ -393,7 +399,8 @@ char** pathVecOfTree(DirTree tree) {
         int i;
 
         for (i = 0; par_vec[i]; i++);
-        par_vec[i] = strdup(name);
+        par_vec[i] = (char*) malloc((1 + strlen(name)) * sizeof(char));
+        strcpy(par_vec[i], name);
         
         /* Add to the path */
         vec = realloc(par_vec, (i+2) * sizeof(char*));
@@ -426,13 +433,13 @@ LList getTreeFileBlocks(DirTree file) {
     if (!file || !(file->is_file))
         return NULL;
     else
-        return cloneLL(file->file_dta.blocks);
+        return cloneLL(file->nodedata.file_dta.blocks);
 
 }
 
 void updateFileSize(DirTree tree, long newSize) {
     if (tree && tree->is_file)
-        tree->file_dta.size = newSize;
+        tree->nodedata.file_dta.size = newSize;
 }
 
 void updateTimestamp(DirTree tree) {
@@ -452,7 +459,7 @@ void assignMemoryBlock(DirTree tree, long blk) {
     tmp = (long*) malloc(sizeof(long));
     *tmp = blk;
 
-    addToLL(tree->file_dta.blocks, 0, tmp);
+    addToLL(tree->nodedata.file_dta.blocks, 0, tmp);
 }
 
 long releaseMemoryBlock(DirTree tree) {
@@ -462,7 +469,7 @@ long releaseMemoryBlock(DirTree tree) {
     if (!tree || !(tree->is_file))
         return -1;
 
-    res = (long*) remFromLL(tree->file_dta.blocks, 0);
+    res = (long*) remFromLL(tree->nodedata.file_dta.blocks, 0);
     val = *res;
     free(res);
 
