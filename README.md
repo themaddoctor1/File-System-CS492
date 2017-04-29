@@ -1,6 +1,6 @@
 # File System Assignment #
 
-This repository contains our code for the third assignment for CS 496.
+This repository contains our code for the third assignment for CS 492.
 
 ### What is this repository for? ###
 
