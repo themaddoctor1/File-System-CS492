@@ -17,7 +17,7 @@ Flag | Description
 `-f [FILENAME]` | Provides the location of a file containing a list of files to include.
 `-s [LONG]` | Specifies the capacity of the system memory.
 
-Note that files provided with `-d` must be built by running `find [DIR] -type d > [FILENAME]` with a directory, or must be shaped to have the same format. Similarly, files provided with `f` must be built with `find [DIR] -type f -ls > [FILENAME]` with a directory of choice. If a path cannot be resolved for some of the files, they will not be added.
+Note that files provided with `-d` must be built by running `find [DIR] -type d > [FILENAME]` with a directory, or must be shaped to have the same format. Similarly, files provided with `-f` must be built with `find [DIR] -type f -ls > [FILENAME]` with a directory of choice. If a path cannot be resolved for some of the files, they will not be added.
 
 The default sizes for the simulated filesystem are to use 512B blocks with a 64kB capacity. If a block size or a disk size are not given, a warning will be thrown to notify the user of the default values. If files are too big to fit in remaining space, an error will be thrown and the file will be skipped.
 
