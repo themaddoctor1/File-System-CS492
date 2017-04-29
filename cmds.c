@@ -434,11 +434,14 @@ int cmd_delete(char *argv[]) {
         while (argv[i]) {
             char **path = str_to_vec(argv[i], '/');
             DirTree tgt = getRelTree(getWorkDirNode(), path);
-            int n;
-
-            if (!tgt) {
+            
+            if (tgt == getWorkDirNode()) {
+                /* Don't delete directory that is currently in use. */
                 errCode = 1;
-                n = 1;
+                printf("delete: failed to remove '%s': Directory currently in use\n", argv[i]);
+            } else if (!tgt) {
+                errCode = 1;
+                printf("delete: cannot delete '%s': No such file or directory", argv[i]);
             } else if (isTreeFile(tgt)) {
                 /* The currently allocated memory blocks */
                 LList blocks = getTreeFileBlocks(tgt);
@@ -452,7 +455,7 @@ int cmd_delete(char *argv[]) {
                 free(blocks);
                 
                 /* Remove the file */
-                n = rmfileFromTree(tgt, NULL);
+                errCode |= rmfileFromTree(tgt, NULL);
 
             } else {
                 /* Handle directory removal. */
@@ -460,9 +463,8 @@ int cmd_delete(char *argv[]) {
                 
                 /* Allow deletion if the directory is empty */
                 if (isEmptyLL(children))
-                    n = rmdirFromTree(tgt, NULL);
+                    errCode |= rmdirFromTree(tgt, NULL);
                 else {
-                    n = 0;
                     errCode = 1;
                     printf("delete: failed to remove '%s': Directory not empty\n", argv[i]);
                 }
@@ -471,12 +473,6 @@ int cmd_delete(char *argv[]) {
                 while(!isEmptyLL(children))
                     remFromLL(children, 0);
                 free(children);
-            }
-
-            if (n) {
-                errCode = 1;
-                printf("delete: cannot delete '%s': No such file or directory", argv[i]);
-
             }
 
             i++;
