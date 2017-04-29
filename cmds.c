@@ -176,7 +176,14 @@ void cmd_exec(char *argv[]) {
         cmd = cmd_prfiles;
     else if (!strcmp(name, "prdisk"))
         cmd = cmd_prdisk;
-    else {
+    else if (!strcmp(name, "cd..")) {
+        char *args[3];
+        args[0] = "cd";
+        args[1] = "..";
+        args[2] = NULL;
+        cmd_exec(args);
+        return;
+    } else {
         printf("%s: command not found.\n", argv[0]);
         return;
     }
@@ -301,7 +308,8 @@ int cmd_mkdir(char *argv[]) {
 
             if (!tgtDir) {
                 /* The containing path does not exist. */
-                printf("mkdir: cannot make directory '%s': No such file or directory\n", argv[i]);
+                printf("mkdir: cannot create directory '%s': No such file or directory\n", argv[i]);
+                errCode = 1;
                 i++;
                 continue;
             }
@@ -313,7 +321,7 @@ int cmd_mkdir(char *argv[]) {
 
                 if (!strcmp(getTreeFilename(file), argv[i])) {
                     /* Don't make duplicate directories */
-                    printf("mkdir: cannot make directory '%s': Already exists\n", argv[i]);
+                    printf("mkdir: cannot create directory '%s': Already exists\n", argv[i]);
                     errCode = 1;
                     break;
                 }
@@ -378,6 +386,15 @@ int cmd_create(char *argv[]) {
             
             /* Get the potential parent node */
             tgtDir = getRelTree(getWorkDirNode(), path);
+
+            /* Check to see if it exists */
+            if (!tgtDir) {
+                printf("mkdir: cannot create file '%s': No such file or directory\n", argv[i]);
+                errCode = 1;
+                i++;
+                continue;
+            }
+
             files = getDirTreeChildren(tgtDir, 0);
 
 
@@ -386,7 +403,7 @@ int cmd_create(char *argv[]) {
 
                 if (!strcmp(getTreeFilename(file), argv[i])) {
                     /* Don't make duplicate directories */
-                    printf("create: cannot make file %s: Already exists.\n", argv[i]);
+                    printf("create: cannot create file %s: Already exists.\n", argv[i]);
                     errCode = 1;
                     break;
                 }
@@ -441,7 +458,7 @@ int cmd_delete(char *argv[]) {
                 printf("delete: failed to remove '%s': Directory currently in use\n", argv[i]);
             } else if (!tgt) {
                 errCode = 1;
-                printf("delete: cannot delete '%s': No such file or directory", argv[i]);
+                printf("delete: cannot delete '%s': No such file or directory\n", argv[i]);
             } else if (isTreeFile(tgt)) {
                 /* The currently allocated memory blocks */
                 LList blocks = getTreeFileBlocks(tgt);
