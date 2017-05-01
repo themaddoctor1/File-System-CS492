@@ -1,3 +1,6 @@
+#define __USE_XOPEN
+#define _GNU_SOURCE
+
 #include "dirtree.h"
 #include "cmds.h"
 #include "simsys.h"
@@ -6,11 +9,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <time.h>
+
 #include <unistd.h>
 
 struct file_loaddata {
     char *name;
     long filesize;
+    time_t timestamp;
 };
 
 void getDirsFromFile(FILE *file, LList dirlist) {
@@ -38,15 +44,35 @@ void getFilesFromFile(FILE *file, LList filelist) {
     
     /* Used for getting file data */
     char pathbuff[2048];
+    char datebuff[32];
     long sizebuff;
-    
+
     int files = 0;
+    
+    /* Timestamp data */
+    time_t read_time = time(NULL);
+    struct tm *str_tm = localtime(&read_time);
+    int curr_year = str_tm->tm_year;
 
     while (fscanf(file, "%*s %*s %*s %*s %*s %*s") != EOF) {
         int i;
+        char m_time[8]; /* Month */
+        char d_time[8]; /* Day */
+        char p_time[8]; /* Parameter */
 
-        fscanf(file, "%ld %*s %*s %*s ", &sizebuff);
+        /* Read time and filename */
+        fscanf(file, "%ld ", &sizebuff);
+        fscanf(file, "%s ", m_time);
+        fscanf(file, "%s ", d_time);
+        fscanf(file, "%s ", p_time);
         fgets(pathbuff, 2048, file);
+
+        /* Build date */
+        sprintf(datebuff, "%s %s %s", m_time, d_time, p_time);
+        if (!strptime(datebuff, "%b %d %H:%M", str_tm))
+            strptime(datebuff, "%b %d %Y", str_tm);
+        else
+            str_tm->tm_year = curr_year;
         
         /* Get rid of the newline */
         for (i = 0; pathbuff[i] != '\n'; i++);
@@ -57,6 +83,7 @@ void getFilesFromFile(FILE *file, LList filelist) {
         dta->name = (char*) malloc((strlen(pathbuff) + 1) * sizeof(char));
         strcpy(dta->name, pathbuff);
         dta->filesize = sizebuff;
+        dta->timestamp = mktime(str_tm);
         
         /* Add to the list */
         appendToLL(filelist, dta);
@@ -77,6 +104,9 @@ int main(int argc, char *argv[]) {
     /* List of all of the files and directories to add */
     LList dir_data = makeLL();
     LList file_data = makeLL();
+
+    LLiter dir_iter;
+    LLiter file_iter;
 
     int i; 
     
@@ -151,23 +181,24 @@ int main(int argc, char *argv[]) {
     init_filesystem(blk_size, fs_size);
 
     /* Put all of the directories in */
-    while (!isEmptyLL(dir_data)) {
-        char *path = (char*) remFromLL(dir_data, 0);
+    dir_iter = makeLLiter(dir_data);
+    while (iterHasNextLL(dir_iter)) {
+        char *path = (char*) iterNextLL(dir_iter);
         char **pathtoks = str_to_vec(path, '/');
         int n;
         
         /* Add the directory */
-        if (pathtoks[1] && (n = addDirToTree(getRootNode(), &pathtoks[1])))
+        if (!pathtoks[1] || (n = addDirToTree(getRootNode(), &pathtoks[1])))
             printf("\033[1m\033[31mError\033[0m: Could not add directory '%s'; error code %i\n", path, n);
 
-        free_str_vec(pathtoks);
-        free(path);
-    }
-    free(dir_data);
 
+        free_str_vec(pathtoks);
+    }
+    
     /* Put all of the files in */
-    while (!isEmptyLL(file_data)) {
-        struct file_loaddata *dta = remFromLL(file_data, 0);
+    file_iter = makeLLiter(file_data);
+    while (iterHasNextLL(file_iter)) {
+        struct file_loaddata *dta = iterNextLL(file_iter);
         char **pathtoks = str_to_vec(dta->name, '/');
 
         long blks = 1 + (dta->filesize - 1) / blk_size;
@@ -188,17 +219,56 @@ int main(int argc, char *argv[]) {
                 }
                 updateFileSize(node, dta->filesize);
                 
+                              
             }
         } else {
             printf("\033[1m\033[31mError\033[0m: Insufficient memory for file '%s' (needs %ld blocks)\n", dta->name, blks);
         }
         
+    }
+
+    /* Initial condition: all directories were made at the end of '69 */
+    while (!isEmptyLL(dir_data)) {
+        char *path = (char*) remFromLL(dir_data, 0);
+        char **pathtoks = str_to_vec(path, '/');
+
+        DirTree dir = getDirSubtree(getRootNode(), &pathtoks[1]);
+        setTimestamp(dir, 0);
+
+        free_str_vec(pathtoks);
+        free(path);
+
+    }
+    
+    /* Update file timestamps */
+    while (!isEmptyLL(file_data)) {
+        struct file_loaddata *dta = remFromLL(file_data, 0);
+        char **pathtoks = str_to_vec(dta->name, '/');
+
+        DirTree node = getDirSubtree(getRootNode(), &pathtoks[1]);
+        DirTree parent = getTreeParent(node);
+
+        time_t timestamp = dta->timestamp;
+
+         /* Update the timestamp */
+        setTimestamp(node, timestamp);
+                 
+        /* Do the same for all parents */
+        if (difftime(getTreeTimestamp(parent), timestamp) < 0) {
+            setTimestamp(parent, timestamp);
+        }
+
         /* Free memory blocks */
         free(pathtoks);
         free(dta->name);
         free(dta);
 
     }
+
+    /* Free lists and iterators */
+    disposeIterLL(dir_iter);
+    disposeIterLL(file_iter);
+    free(dir_data);
     free(file_data);
 
     while (1) {

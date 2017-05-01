@@ -139,6 +139,10 @@ DirTree getDirSubtree(DirTree tree, char *path[]) {
     return NULL;
 }
 
+DirTree getTreeParent(DirTree tree) {
+    return tree->parent_dir ? tree->parent_dir : tree;
+}
+
 int addNodeToTree(DirTree tree, char *path[], int is_file) {
     int i;
     DirTree tgtDir;
@@ -445,6 +449,11 @@ void updateFileSize(DirTree tree, long newSize) {
 void updateTimestamp(DirTree tree) {
     if (tree)
         tree->timestamp = time(NULL);
+}
+
+void setTimestamp(DirTree tree, time_t t) {
+    if (tree)
+        tree->timestamp = t;
 }
 
 void assignMemoryBlock(DirTree tree, long blk) {

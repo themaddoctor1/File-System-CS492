@@ -91,10 +91,22 @@ void printTreeNode(DirTree node, int fullpath, int details) {
     filename = getTreeFilename(node);
     
     if (details) {
-        time_t time = getTreeTimestamp(node);
-        struct tm* timestamp = localtime(&time);
+        time_t now = time(NULL);
+        struct tm* timestamp;
+        int currYear;
 
-        strftime(buff, 32*sizeof(char), "%b %d %H:%M", timestamp);
+        time_t time = getTreeTimestamp(node);
+        
+        timestamp = localtime(&now);
+        currYear = timestamp->tm_year;
+
+        timestamp = localtime(&time);
+        
+        if (currYear == timestamp->tm_year)
+            strftime(buff, 32*sizeof(char), "%b %d %H:%M", timestamp);
+        else
+            strftime(buff, 32*sizeof(char), "%b %d %Y", timestamp);
+
         printf("%-15s ", buff);
         printf("%-15ld ", filesize);
 
