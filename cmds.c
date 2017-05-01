@@ -866,8 +866,10 @@ int cmd_prdisk(char *argv[]) {
 
     if (hi != lo)
         printf("Free: %ld - %ld\n", lo, hi-1);
-
-    printf("\nTotal allocation: %ld blocks\n", net_alloc);
+    
+    printf("\nUsed allocation:  %ld blocks\n", alloc);
+    printf("Fragmentation:    %ld blocks\n", net_alloc - alloc);
+    printf("Total allocation: %ld blocks\n", net_alloc);
 
     return 0;
 
