@@ -471,7 +471,7 @@ int cmd_append(char *argv[]) {
                     blocksNeeded--;
                 }
                 updateFileSize(tgt, fileSizeAfter);
-                updateTimeStamp(tgt);
+                updateTimestamp(tgt);
             } else {
                 errCode = 1;
                 printf("append: cannot modify '%s': Insufficient memory space to allocate %ld blocks\n", argv[1], blocksNeeded);
@@ -521,7 +521,7 @@ int cmd_remove(char *argv[]) {
                     freeBlock(releaseMemoryBlock(tgt));
                 }
                 updateFileSize(tgt, fileSizeAfter);
-                updateTimeStamp(tgt);
+                updateTimestamp(tgt);
             }
 
         } else {
