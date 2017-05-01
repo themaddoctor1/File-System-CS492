@@ -28,6 +28,8 @@ void flushDirTree(DirTree tree);
  */
 DirTree getDirSubtree(DirTree tree, char *path[]);
 
+DirTree getTreeParent(DirTree);
+
 /**
  * Adds a directory path to the tree
  * path - The filepath, vectorized
@@ -128,10 +130,15 @@ LList getTreeFileBlocks(DirTree file);
 void updateFileSize(DirTree, long);
 
 /**
- * Updates with timestamp of a tree node. Should be called whenever
+ * Updates timestamp of a tree node. Should be called whenever
  * a file is modified.
  */
 void updateTimestamp(DirTree);
+
+/**
+ * Manually updates timestamp of a tree node.
+ */
+void setTimestamp(DirTree, time_t);
 
 /**
  * Assigns a block of memory to a file.
