@@ -107,8 +107,8 @@ void freeBlock(long blk) {
     
     if (lo == hi-1) {
         /* The sector is of size 1, so free the whole sector */
-        free(getFromLL(MEM_ALLOC, 2*i));
-        free(getFromLL(MEM_ALLOC, 2*i));
+        free(remFromLL(MEM_ALLOC, 2*i));
+        free(remFromLL(MEM_ALLOC, 2*i));
     } else if (lo == blk) {
         /* The block is at the front of the sector */
         *((long*) getFromLL(MEM_ALLOC, 2*i)) += 1;
@@ -168,7 +168,7 @@ long allocBlock() {
                sector or the end of memory */
             max_free = sectors == 1
                                   ? NUM_BLOCKS
-                                  : *((long*) getFromLL(MEM_ALLOC, 3));
+                                  : *((long*) getFromLL(MEM_ALLOC, 2));
             
             if (min_free == max_free) {
                 /* No available memory */

@@ -456,9 +456,9 @@ int cmd_append(char *argv[]) {
         if (!tgt) {
             errCode = 1;
             printf("append: cannot modify '%s': No such file\n", argv[1]);
-        } else if (request < 0) {
+        } else if (request <= 0) {
             errCode = 1;
-            printf("append: cannot give negative memory\n");
+            printf("append: cannot append nonpositive memory\n");
         } else if (isTreeFile(tgt)) {
 
             /* Calculate the necessary block allocation needed */
@@ -515,31 +515,46 @@ int cmd_remove(char *argv[]) {
         
         char **path = str_to_vec(argv[1], '/');
         DirTree tgt = getRelTree(getWorkDirNode(), path);
+
+        long request = atol(argv[2]);
         
         if (!tgt) {
             errCode = 1;
             printf("remove: cannot modify '%s': No such file\n", argv[1]);
+        } else if (request <= 0) {
+            errCode = 1;
+            printf("remove: cannot remove nonpositive memory\n");
         } else if (isTreeFile(tgt)) {
 
             /* Calculate the necessary block deallocation needed */
-            long fileSizeBefore, fileSizeAfter, blocksNeeded;
+            long fileSizeBefore;
+            long fileSizeAfter;
+            long blocksNeeded;
+
             fileSizeBefore = treeFileSize(tgt, NULL);
-            fileSizeAfter = treeFileSize(tgt, NULL) - atol(argv[2]);
+            fileSizeAfter = fileSizeBefore - request;
 
             /* Difference of ceiling divisions for old/new block size */
-            blocksNeeded = ((fileSizeAfter - 1) / blockSize() + 1) - ((fileSizeBefore - 1) / blockSize() + 1);
+            blocksNeeded = fileSizeAfter
+                            ? ((fileSizeBefore - 1) / blockSize() - (fileSizeAfter - 1) / blockSize())
+                            : (1 + (fileSizeBefore - 1) / blockSize());
 
             /* Update the file */
             if (fileSizeAfter < 0) {
                 errCode = 1;
                 printf("remove: cannot modify '%s': More blocks requested for deletion than exist\n", argv[1]);
-            }
-            else {
+            } else {
+                printf("Deallocating %ld bytes (revoking %ld blocks)...\n", request, blocksNeeded);
+                
+                /* Deallocate the blocks */
                 while (blocksNeeded > 0) {
                     freeBlock(releaseMemoryBlock(tgt));
+                    blocksNeeded--;
                 }
+
                 updateFileSize(tgt, fileSizeAfter);
                 updateTimestamp(tgt);
+                updateTimestamp(getTreeParent(tgt));
             }
 
         } else {
