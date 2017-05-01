@@ -287,7 +287,7 @@ int cmd_ls(char *argv[]) {
 int cmd_mkdir(char *argv[]) {
     
     if (!argv[1]) {
-        printf("mkdir: missing operand");
+        printf("mkdir: missing operand\n");
         return 1;
     } else {
         /* Get a list of all of the files in the directory */
