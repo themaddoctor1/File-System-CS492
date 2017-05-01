@@ -431,12 +431,96 @@ int cmd_create(char *argv[]) {
 }
 
 int cmd_append(char *argv[]) {
-    error_message(argv[0], "Not yet implemented."); return 0;
+    if (!argv[1] || !argv[2]) {
+         printf("append: missing operand\n");
+         return 1;
+    } else {
+        int errCode = 0;
+        
+        char **path = str_to_vec(argv[1], '/');
+        DirTree tgt = getRelTree(getWorkDirNode(), path);
+        
+        if (!tgt) {
+            errCode = 1;
+            printf("append: cannot modify '%s': No such file\n", argv[1]);
+        } else if (isTreeFile(tgt)) {
+            /* Calculate the necessary block allocation needed */
+            long fileSizeBefore, fileSizeAfter, blocksNeeded;
+            fileSizeBefore = treeFileSize(tgt, NULL);
+            fileSizeAfter = treeFileSize(tgt, NULL) + atol(argv[2]);
+
+            /* Difference of ceiling divisions for old/new block size */
+            blocksNeeded = ((fileSizeAfter - 1) / blockSize() + 1) - ((fileSizeBefore - 1) / blockSize() + 1);
+
+            /* Update the file */
+            if (enoughMemFor(blocksNeeded)) {
+                while (blocksNeeded > 0) {
+                    assignMemoryBlock(tgt, allocBlock());
+                    blocksNeeded--;
+                }
+                updateFileSize(tgt, fileSizeAfter);
+            } else {
+                errCode = 1;
+                printf("append: cannot modify '%s': Insufficient memory space to allocate %ld blocks\n", argv[1], blocksNeeded);
+            }
+            
+            /* updateTimeStamp(tgt); */
+
+        } else {
+            errCode = 1;
+            printf("append: cannot modify '%s': Not a file\n", argv[1]);
+        }
+
+
+        return errCode;
+    }
 }
 
 
 int cmd_remove(char *argv[]) {
-    error_message(argv[0], "Not yet implemented."); return 0;
+    if (!argv[1] || !argv[2]) {
+         printf("remove: missing operand\n");
+         return 1;
+    } else {
+        int errCode = 0;
+        
+        char **path = str_to_vec(argv[1], '/');
+        DirTree tgt = getRelTree(getWorkDirNode(), path);
+        
+        if (!tgt) {
+            errCode = 1;
+            printf("remove: cannot modify '%s': No such file\n", argv[1]);
+        } else if (isTreeFile(tgt)) {
+
+            /* Calculate the necessary block deallocation needed */
+            long fileSizeBefore, fileSizeAfter, blocksNeeded;
+            fileSizeBefore = treeFileSize(tgt, NULL);
+            fileSizeAfter = treeFileSize(tgt, NULL) - atol(argv[2]);
+
+            /* Difference of ceiling divisions for old/new block size */
+            blocksNeeded = ((fileSizeAfter - 1) / blockSize() + 1) - ((fileSizeBefore - 1) / blockSize() + 1);
+
+            /* Update the file */
+            if (fileSizeAfter < 0) {
+                errCode = 1;
+                printf("remove: cannot modify '%s': More blocks requested for deletion than exist\n", argv[1]);
+            }
+            else {
+                while (blocksNeeded > 0) {
+                    freeBlock(releaseMemoryBlock(tgt));
+                }
+                updateFileSize(tgt, fileSizeAfter);
+            }
+            
+            /* updateTimeStamp(tgt); */
+
+        } else {
+            errCode = 1;
+            printf("remove: cannot modify '%s': Not a file\n", argv[1]);
+        }
+
+        return errCode;
+    }
 }
 
 
