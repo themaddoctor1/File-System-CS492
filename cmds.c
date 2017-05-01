@@ -451,27 +451,45 @@ int cmd_append(char *argv[]) {
         
         char **path = str_to_vec(argv[1], '/');
         DirTree tgt = getRelTree(getWorkDirNode(), path);
+        long request = atol(argv[2]);
         
         if (!tgt) {
             errCode = 1;
             printf("append: cannot modify '%s': No such file\n", argv[1]);
+        } else if (request < 0) {
+            errCode = 1;
+            printf("append: cannot give negative memory\n");
         } else if (isTreeFile(tgt)) {
+
             /* Calculate the necessary block allocation needed */
-            long fileSizeBefore, fileSizeAfter, blocksNeeded;
+            long fileSizeBefore;
+            long fileSizeAfter;
+            long blocksNeeded;
+
             fileSizeBefore = treeFileSize(tgt, NULL);
-            fileSizeAfter = treeFileSize(tgt, NULL) + atol(argv[2]);
+            fileSizeAfter = fileSizeBefore + request;
 
             /* Difference of ceiling divisions for old/new block size */
-            blocksNeeded = ((fileSizeAfter - 1) / blockSize() + 1) - ((fileSizeBefore - 1) / blockSize() + 1);
+            blocksNeeded = fileSizeBefore 
+                            ? ((fileSizeAfter - 1) / blockSize() - (fileSizeBefore - 1) / blockSize())
+                            : (1 + (fileSizeAfter - 1) / blockSize());
 
             /* Update the file */
             if (enoughMemFor(blocksNeeded)) {
+
+                printf("Allocating %ld bytes (needs %ld blocks)...\n", request, blocksNeeded);
+
+                /* Allocate blocks */
                 while (blocksNeeded > 0) {
                     assignMemoryBlock(tgt, allocBlock());
                     blocksNeeded--;
                 }
+
                 updateFileSize(tgt, fileSizeAfter);
+
                 updateTimestamp(tgt);
+                updateTimestamp(getTreeParent(tgt));
+
             } else {
                 errCode = 1;
                 printf("append: cannot modify '%s': Insufficient memory space to allocate %ld blocks\n", argv[1], blocksNeeded);
