@@ -140,7 +140,10 @@ DirTree getDirSubtree(DirTree tree, char *path[]) {
 }
 
 DirTree getTreeParent(DirTree tree) {
-    return tree->parent_dir ? tree->parent_dir : tree;
+    if (tree)
+        return tree->parent_dir ? tree->parent_dir : tree;
+    else
+        return NULL;
 }
 
 int addNodeToTree(DirTree tree, char *path[], int is_file) {
