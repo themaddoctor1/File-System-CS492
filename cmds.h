@@ -27,8 +27,8 @@ int cmd_create(char *argv[]);
 /**
  * Modifying the size of a file.
  */
-int cmd_append(char *argv[]); /* TODO: Implement */
-int cmd_remove(char *argv[]); /* TODO: Implement */
+int cmd_append(char *argv[]);
+int cmd_remove(char *argv[]);
 
 int cmd_delete(char *argv[]);
 
