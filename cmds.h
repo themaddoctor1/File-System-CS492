@@ -1,6 +1,12 @@
 #ifndef _CMDS_H_
 #define _CMDS_H_
 
+/**
+ * I pledge my honor that I have abided by the Stevens Honor System.
+ * Christopher Hittner
+ * James Romph
+ */
+
 typedef int (*SimCmd)(char**);
 
 char** str_to_vec(char*, char);

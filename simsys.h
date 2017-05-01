@@ -1,6 +1,12 @@
 #ifndef _SIMSYS_H_
 #define _SIMSYS_H_
 
+/**
+ * I pledge my honor that I have abided by the Stevens Honor System.
+ * Christopher Hittner
+ * James Romph
+ */
+
 #include "dirtree.h"
 
 /**

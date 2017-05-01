@@ -1,6 +1,12 @@
 #ifndef _DIRTREE_H_
 #define _DIRTREE_H_
 
+/**
+ * I pledge my honor that I have abided by the Stevens Honor System.
+ * Christopher Hittner
+ * James Romph
+ */
+
 #include "linkedlist.h"
 
 #include <time.h>

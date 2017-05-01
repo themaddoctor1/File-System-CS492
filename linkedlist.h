@@ -1,6 +1,12 @@
 #ifndef _LINKEDLIST_H_
 #define _LINKEDLIST_H_
 
+/**
+ * I pledge my honor that I have abided by the Stevens Honor System.
+ * Christopher Hittner
+ * James Romph
+ */
+
 struct linkedlist;
 typedef struct linkedlist* LList;
 
