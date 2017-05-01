@@ -892,7 +892,7 @@ int cmd_prdisk(char *argv[]) {
     if (hi != lo)
         printf("Free: %ld - %ld\n", lo, hi-1);
     
-    printf("Fragmentation:    %ld blocks\n", frag);
+    printf("fragmentation: %ld bytes\n", frag);
 
     return 0;
 
