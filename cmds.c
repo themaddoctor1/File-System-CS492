@@ -835,8 +835,8 @@ int cmd_prfiles(char *argv[]) {
 int cmd_prdisk(char *argv[]) {
     
     LList sectors = getAllocData();
-    long alloc = 0;
-    long net_alloc = 0;
+    LList bfs_list = makeLL();
+    long frag = 0;
     long lo = 0;
     long hi = 0;
 
@@ -852,13 +852,38 @@ int cmd_prdisk(char *argv[]) {
 
         printf("Used: %ld - %ld\n", lo, hi-1);
 
-        alloc += hi - lo;
-        net_alloc = hi;
-
     }
     
     /* Free the list */
     free(sectors);
+
+    appendToLL(bfs_list, getRootNode());
+
+    while (!isEmptyLL(bfs_list)) {
+        DirTree curr = (DirTree) remFromLL(bfs_list, 0);
+                        
+        /* Breadth-first recursive definition */
+        if (!isTreeFile(curr)) {
+            /* Is a directory; add all children */
+            LList children = getDirTreeChildren(curr, 1);
+
+            while (!isEmptyLL(children))
+                appendToLL(bfs_list, remFromLL(children, 0));
+
+            free(children);
+
+        } else {
+            /* Get block information */
+            long use = (treeFileSize(curr, NULL) % blockSize());
+            frag += use ? (blockSize() - use) : 0;
+        }
+
+    }
+    
+    /* Dispose of the list */
+    free(bfs_list);
+
+
     
     /* Print the last of the allocated memory */
     lo = hi;
@@ -867,9 +892,7 @@ int cmd_prdisk(char *argv[]) {
     if (hi != lo)
         printf("Free: %ld - %ld\n", lo, hi-1);
     
-    printf("\nUsed allocation:  %ld blocks\n", alloc);
-    printf("Fragmentation:    %ld blocks\n", net_alloc - alloc);
-    printf("Total allocation: %ld blocks\n", net_alloc);
+    printf("Fragmentation:    %ld blocks\n", frag);
 
     return 0;
 
