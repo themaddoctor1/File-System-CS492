@@ -206,7 +206,7 @@ LLiter makeLLiter(LList list) {
 }
 
 int iterHasNextLL(LLiter iter) {
-    return iter->curr != NULL;
+    return iter && iter->curr != NULL;
 }
 
 void *iterNextLL(LLiter iter) {

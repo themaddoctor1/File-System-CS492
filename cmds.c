@@ -163,7 +163,7 @@ void cmd_exec(char *argv[]) {
     char *name = argv[0];
 
     /* Don't need to bother with empty line */
-    if (!argv)
+    if (!argv || !argv[0])
         return;
     
     if (!strcmp(name, "cd"))
@@ -188,6 +188,8 @@ void cmd_exec(char *argv[]) {
         cmd = cmd_prfiles;
     else if (!strcmp(name, "prdisk"))
         cmd = cmd_prdisk;
+    else if (!strcmp(name, "defrag"))
+        cmd = cmd_defrag;
     else if (!strcmp(name, "cd..")) {
         char *args[3];
         args[0] = "cd";
@@ -287,7 +289,7 @@ int cmd_ls(char *argv[]) {
 int cmd_mkdir(char *argv[]) {
     
     if (!argv[1]) {
-        printf("mkdir: missing operand\n");
+        printf("mkdir: missing operand");
         return 1;
     } else {
         /* Get a list of all of the files in the directory */
@@ -687,7 +689,7 @@ int cmd_dir(char *argv[]) {
     
 }
 
-/* Used by prfiles for nlogn sort */
+/* Used for nlogn sort of longs */
 void mergesort_longs(long *list, int lo, int hi) {
     if (hi - lo == 2) {
         /* Pair case */
@@ -898,7 +900,6 @@ int cmd_prdisk(char *argv[]) {
 
 
 }
-
 
 
 

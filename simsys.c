@@ -86,6 +86,10 @@ long numBlocks() {
     return NUM_BLOCKS;
 }
 
+long numSectors() {
+    return sizeOfLL(MEM_ALLOC) / 2;
+}
+
 void freeBlock(long blk) {
     int sectors = sizeOfLL(MEM_ALLOC);
     long lo, hi;
@@ -235,6 +239,25 @@ int enoughMemFor(long amt) {
 
 LList getAllocData() {
     return cloneLL(MEM_ALLOC);
+}
+
+long blocksAllocated() {
+    long amt = 0;
+
+    LLiter iter = makeLLiter(MEM_ALLOC);
+    while (iterHasNextLL(iter))
+        amt -= (*((long*) iterNextLL(iter)) - *((long*) iterNextLL(iter)));
+    
+    return amt;
+}
+
+long nextBlock() {
+    if (isEmptyLL(MEM_ALLOC))
+        return 0;
+    else if (*((long*) getFromLL(MEM_ALLOC, 0)))
+        return 0;
+    else
+        return *((long*) getFromLL(MEM_ALLOC, 1));
 }
 
 DirTree getRelTree(DirTree tree, char **path) {

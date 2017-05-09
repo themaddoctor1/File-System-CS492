@@ -37,6 +37,7 @@ long blockSize();
 
 /* The total number of blocks available on the system */
 long numBlocks();
+long numSectors();
 
 /**
  * Frees a given block of memory.
@@ -66,6 +67,9 @@ int enoughMemFor(long n);
  * Get the list of allocated sectors.
  */
 LList getAllocData();
+
+long blocksAllocated();
+long nextBlock();
 
 /**
  * Gets a relative node in the tree structure.

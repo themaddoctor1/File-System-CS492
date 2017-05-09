@@ -11,6 +11,7 @@ typedef int (*SimCmd)(char**);
 
 char** str_to_vec(char*, char);
 void free_str_vec(char**);
+void mergesort_longs(long*, int, int);
 
 /**
  * Executes a command in the file system.
@@ -53,5 +54,7 @@ int cmd_dir(char *argv[]);
  */
 int cmd_prfiles(char *argv[]);
 int cmd_prdisk(char *argv[]);
+
+int cmd_defrag(char *argv[]);
 
 #endif
