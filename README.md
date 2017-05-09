@@ -38,6 +38,7 @@ Command | Description
 `dir [PATH (optional)]` | Does a BFS print of the file system.
 `prfiles [PATH (optional)]` | Does a BFS print of all files with space analysis.
 `prdisk` | Displays disk allocation information.
+`defrag [NUMBER (optional)]` | Added by Christopher Hittner for the bonus assignment. Defragments the file system.
 
 ### Honor Pledge ###
 We pledge our honor that we have abided by the Stevens Honor System.
